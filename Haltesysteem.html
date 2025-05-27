@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Haltes opvragen - De Lijn</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .form-wrapper {
+      width: 40%;
+      padding: 2rem;
+      background-color: white;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+      overflow-y: auto;
+    }
+    .results-wrapper {
+      width: 60%;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    input, select, button {
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #005a9c;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1.5rem;
+    }
+    button:hover {
+      background-color: #003f70;
+    }
+    .gemeente {
+      margin-top: 1.5rem;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    ul { padding-left: 1.2rem; }
+    li {
+      margin: 0.3rem 0;
+      font-size: 1rem;
+    }
+    .marker {
+      color: green;
+      font-weight: bold;
+      background: #eaffea;
+      border-left: 4px solid green;
+      padding-left: 0.5rem;
+    }
+    .volgende {
+      background: #fff8dc;
+      padding-left: 0.5rem;
+      border-left: 4px solid #daa520;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-wrapper">
+      <h1>Haltes opvragen</h1>
+      <form id="halteForm">
+        <label>Entiteit: <input type="text" id="entiteit" required></label>
+        <label>Lijnnummer: <input type="text" id="lijnnummer" required></label>
+        <label>Richting:
+          <select id="richting" required>
+            <option value="HEEN">HEEN</option>
+            <option value="TERUG">TERUG</option>
+          </select>
+        </label>
+        <button type="submit">Toon haltes</button>
+      </form>
+    </div>
+    <div class="results-wrapper">
+      <h2>Resultaat:</h2>
+      <div id="resultaat">Wachten op input…</div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('halteForm');
+    const resultaatDiv = document.getElementById('resultaat');
+
+    function haversine(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const toRad = deg => deg * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultaatDiv.innerHTML = "Laden...";
+
+      const entiteit = document.getElementById('entiteit').value;
+      const lijnnummer = document.getElementById('lijnnummer').value;
+      const richting = document.getElementById('richting').value;
+      const apiKey = "ee23ac060f8a4038ad6d69358d85a1b0";
+      const url = `https://api.delijn.be/DLKernOpenData/api/v1/lijnen/${entiteit}/${lijnnummer}/lijnrichtingen/${richting}/haltes`;
+
+      try {
+        const response = await fetch(url, {
+          headers: { "Ocp-Apim-Subscription-Key": apiKey }
+        });
+        if (!response.ok) throw new Error(`API-fout: ${response.status}`);
+        const data = await response.json();
+        if (!data.haltes || data.haltes.length === 0)
+          throw new Error("Geen haltes gevonden.");
+
+        const toonHaltes = (markerIndex = 0) => {
+          resultaatDiv.innerHTML = '';
+          const gemeenteMap = new Map();
+
+          data.haltes.forEach((halte, index) => {
+            const gemeente = halte.omschrijvingGemeente;
+            const omschrijving = halte.omschrijvingLang || halte.omschrijving;
+            const li = document.createElement('li');
+
+            if (index === markerIndex) {
+              li.textContent = '📍 ' + omschrijving;
+              li.classList.add('marker');
+              li.id = 'marker';
+            } else if (index === markerIndex + 1) {
+              li.textContent = omschrijving;
+              li.classList.add('volgende');
+            } else {
+              li.textContent = omschrijving;
+            }
+
+            if (!gemeenteMap.has(gemeente)) {
+              const gemeenteHeader = document.createElement('div');
+              gemeenteHeader.className = 'gemeente';
+              gemeenteHeader.textContent = gemeente;
+              const ul = document.createElement('ul');
+              gemeenteMap.set(gemeente, ul);
+              resultaatDiv.appendChild(gemeenteHeader);
+              resultaatDiv.appendChild(ul);
+            }
+
+            gemeenteMap.get(gemeente).appendChild(li);
+          });
+
+          const markerEl = document.getElementById('marker');
+          if (markerEl) {
+            markerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        };
+
+        // Eerst proberen met geolocatie
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const userLat = pos.coords.latitude;
+            const userLon = pos.coords.longitude;
+            let dichtsbij = 0;
+            let minAfstand = Infinity;
+
+            data.haltes.forEach((halte, index) => {
+              const afstand = haversine(userLat, userLon, halte.lat, halte.lon);
+              if (afstand < minAfstand) {
+                minAfstand = afstand;
+                dichtsbij = index;
+              }
+            });
+
+            toonHaltes(dichtsbij);
+          },
+          () => {
+            // Fallback: geen locatie -> eerste halte als marker
+            toonHaltes(0);
+          }
+        );
+
+      } catch (error) {
+        resultaatDiv.innerHTML = `<p style="color:red;">Fout: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
