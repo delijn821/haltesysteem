@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Haltezoeker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    select, input {
+      margin-top: 5px;
+    }
+    #halteLijst div {
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Haltezoeker</h1>
+
+  <label for="lijnnummer">Lijnnummer:</label>
+  <input type="text" id="lijnnummer" />
+
+  <label for="richting">Richting:</label>
+  <select id="richting">
+    <option value="0">Heen</option>
+    <option value="1">Terug</option>
+  </select>
+
+  <div id="locatieControls">
+    <button id="laadHaltes">📍 Toon haltes in buurt</button>
+    <button id="volgendeHalte">➡️ Volgende halte</button>
+    <button id="openHaltescherm">🎥 Open Haltescherm</button>
+  </div>
+
+  <div id="halteLijst"></div>
+
+  <!-- HALTESCHERM -->
+  <div id="haltescherm" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#fff; z-index:9999; padding:20px; box-sizing:border-box; font-family:'Segoe UI',sans-serif;">
+    <button onclick="document.getElementById('haltescherm').style.display='none'; clearInterval(halteschermInterval);" style="position:absolute; top:10px; right:10px; font-size:1.2em;">✖</button>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div id="lijnDisplay" style="background:#007bff; color:white; padding:5px 15px; border-radius:10px; font-size:1.2em;">Lijn 0</div>
+        <div id="eindhalteDisplay" style="font-size:1.2em;">Laatste halte</div>
+        <div id="tijdDisplay" style="font-weight:bold;"></div>
+    </div>
+    <div id="halteContent" style="margin-top:40px;"></div>
+  </div>
+
+  <script>
+    let haltes = [];
+    let huidigeIndex = 0;
+    let halteschermInterval = null;
+
+    async function getUserLocation() {
+      return new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            position => resolve(position.coords),
+            error => reject(error)
+          );
+        } else {
+          reject(new Error("Geolocatie niet ondersteund"));
+        }
+      });
+    }
+
+    async function laadHaltes() {
+      const lijnnummer = document.getElementById("lijnnummer").value;
+      const richting = document.getElementById("richting").value;
+
+      try {
+        const response = await fetch(
+          `https://data.delijn.be/DLKernOpenData/api/v1/haltes/lijn/${lijnnummer}/${richting}`
+        );
+        if (!response.ok) throw new Error("Netwerkfout bij ophalen haltes");
+
+        haltes = await response.json();
+        updateHalteLijst();
+      } catch (error) {
+        console.error("Fout bij ophalen haltes:", error);
+      }
+    }
+
+    function updateHalteLijst() {
+      const lijst = document.getElementById("halteLijst");
+      lijst.innerHTML = "";
+
+      if (haltes.length === 0) {
+        lijst.textContent = "Geen haltes gevonden.";
+        return;
+      }
+
+      haltes.forEach((halte, index) => {
+        const div = document.createElement("div");
+        div.textContent = `${halte.omschrijvingLang || halte.omschrijving} (${halte.omschrijvingGemeente})`;
+        if (index === huidigeIndex) {
+          div.style.fontWeight = "bold";
+          div.style.color = "green";
+        }
+        lijst.appendChild(div);
+      });
+    }
+
+    document.getElementById("laadHaltes").addEventListener("click", laadHaltes);
+
+    document.getElementById("volgendeHalte").addEventListener("click", () => {
+      if (haltes.length === 0) return;
+      huidigeIndex = (huidigeIndex + 1) % haltes.length;
+      updateHalteLijst();
+    });
+
+    document.getElementById("openHaltescherm").addEventListener("click", () => {
+      if (haltes.length === 0) return alert("Laad eerst haltes.");
+
+      document.getElementById("haltescherm").style.display = "block";
+      updateHaltescherm();
+      halteschermInterval = setInterval(updateHaltescherm, 7500);
+    });
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function updateHaltescherm() {
+      const tijdNow = new Date();
+      document.getElementById("tijdDisplay").textContent =
+        tijdNow.toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' });
+
+      document.getElementById("lijnDisplay").textContent = "Lijn " + document.getElementById("lijnnummer").value;
+      document.getElementById("eindhalteDisplay").textContent = haltes[haltes.length - 1]?.omschrijving || "Laatste halte";
+
+      getUserLocation().then(coords => {
+        let dichtste = haltes[0];
+        let minAfstand = calculateDistance(coords.latitude, coords.longitude, dichtste.geoCoordinaat.latitude, dichtste.geoCoordinaat.longitude);
+
+        for (const h of haltes) {
+          const afstand = calculateDistance(coords.latitude, coords.longitude, h.geoCoordinaat.latitude, h.geoCoordinaat.longitude);
+          if (afstand < minAfstand) {
+            minAfstand = afstand;
+            dichtste = h;
+          }
+        }
+
+        const content = document.getElementById("halteContent");
+        content.innerHTML = "";
+
+        if (minAfstand <= 100) {
+          const plaats = dichtste.omschrijvingGemeente + ",";
+          const naam = dichtste.omschrijvingLang || dichtste.omschrijving;
+
+          content.innerHTML = `
+            <div style="text-align:center;">
+              <div style="font-size:2em;">De huidige halte is:</div>
+              <div style="font-size:4em; font-weight:bold;">${plaats}</div>
+              <div style="font-size:2.5em;">${naam}</div>
+            </div>
+          `;
+        } else {
+          let index = haltes.findIndex(h => h.haltenummer === dichtste.haltenummer);
+          let volgendeHaltes = haltes.slice(index, index + 8);
+
+          const parelContainer = document.createElement("div");
+          parelContainer.style.display = "flex";
+          parelContainer.style.justifyContent = "center";
+          parelContainer.style.alignItems = "flex-end";
+          parelContainer.style.gap = "15px";
+
+          volgendeHaltes.forEach((halte, i) => {
+            const grootte = 2.5 - i * 0.2;
+            const item = document.createElement("div");
+            item.style.fontSize = `${grootte}em`;
+            item.style.textAlign = "center";
+            item.innerHTML = `
+              <div style="font-weight:bold;">${halte.omschrijvingGemeente}</div>
+              <div>${halte.omschrijvingLang || halte.omschrijving}</div>
+            `;
+            parelContainer.appendChild(item);
+          });
+
+          content.appendChild(parelContainer);
+        }
+      }).catch(() => {
+        document.getElementById("halteContent").textContent = "Locatie niet beschikbaar.";
+      });
+    }
+  </script>
+</body>
+</html>
