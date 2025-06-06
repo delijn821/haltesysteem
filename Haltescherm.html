@@ -1,125 +1,413 @@
-<!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Haltescherm Weergave</title>
-  <script defer>
-    let huidigeIndex = 0;
-    let parelsnoerData = [];
-    let wisselInterval = null;
+    <meta charset="UTF-8">
+    <title>Haltes opvragen - De Lijn</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+        }
 
-    function startHaltescherm() {
-      const entiteit = document.getElementById("entiteit").value;
-      const lijnnummer = document.getElementById("lijnnummer").value;
-      const richting = document.getElementById("richting").value;
-      const autoVervers = document.getElementById("autoVervers").checked;
+        #formContainer {
+            width: 30%;
+            padding: 30px;
+            background-color: #ffffff;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
 
-      laadHalteData(entiteit, lijnnummer, richting);
+        #formContainer h1 {
+            font-size: 1.6em;
+            color: #007bff;
+            margin-bottom: 0;
+        }
 
-      document.getElementById("instellingen").style.display = "none";
-      document.getElementById("haltescherm").classList.remove("hidden");
+        #halteForm label {
+            display: flex;
+            flex-direction: column;
+            font-weight: 500;
+        }
 
-      startHalteWissel();
-    }
+        input[type="text"],
+        select {
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+        }
 
-    function laadHalteData(entiteit, lijnnummer, richting) {
-      parelsnoerData = [
-        "Station", "Markt", "Centrum", "Burg", "Ziekenhuis",
-        "Sporthal", "Kerk", "Eindpunt"
-      ];
-      huidigeIndex = 0;
-    }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            margin-top: 10px;
+        }
 
-    function startHalteWissel() {
-      let detailView = true;
-      updateHaltescherm(detailView);
+        button:hover {
+            background-color: #0056b3;
+        }
 
-      if (wisselInterval) clearInterval(wisselInterval);
+        #locatieControls {
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
 
-      wisselInterval = setInterval(() => {
-        detailView = !detailView;
-        updateHaltescherm(detailView);
-      }, 7500);
-    }
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
 
-    function updateHaltescherm(detail) {
-      const halteWeergave = document.getElementById("halteweergave");
-      const parelsnoer = document.getElementById("parelsnoer");
+        #resultaat {
+            width: 70%;
+            padding: 30px;
+            overflow-y: auto;
+        }
 
-      if (detail) {
-        halteWeergave.innerText = "Volgende halte: " + parelsnoerData[huidigeIndex];
-        parelsnoer.innerHTML = "";
-      } else {
-        halteWeergave.innerText = "";
-        parelsnoer.innerHTML = parelsnoerData.map((halte, i) => `
-          <div class="halte-item ${i === huidigeIndex ? 'actief' : ''}">
-            ${halte}
-          </div>
-        `).join("");
-      }
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
 
-      huidigeIndex = (huidigeIndex + 1) % parelsnoerData.length;
-    }
-  </script>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      background: #111;
-      color: white;
-    }
-    input, select, button {
-      font-size: 1rem;
-    }
-    #instellingen input, #instellingen select {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border-radius: 0.25rem;
-      border: none;
-    }
-    #instellingen button {
-      background-color: #2563eb;
-      color: white;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 0.25rem;
-    }
-    #parelsnoer {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-    }
-    .halte-item {
-      padding: 1rem;
-      border-radius: 0.5rem;
-      background-color: #4b5563;
-      color: white;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    .halte-item.actief {
-      background-color: #facc15;
-      color: black;
-    }
-  </style>
+        li {
+            background-color: white;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .gemeente {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 25px 0 10px;
+            color: #444;
+        }
+
+        .marker {
+            background-color: #d0ebff !important;
+            font-weight: bold;
+            border-left: 4px solid #007bff;
+        }
+
+        .volgende {
+            background-color: #fff8dc !important;
+            border-left: 4px solid #ffc107;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            #formContainer, #resultaat {
+                width: 100%;
+            }
+        }
+      #displayMode {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 9999;
+}
+
+#displayTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+    font-size: 3em;
+    background-color: #222;
+}
+
+#lijnnummerVak {
+    background-color: #fff;
+    color: #000;
+    padding: 10px 25px;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+#bestemmingVak {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+}
+
+#klokVak {
+    font-family: monospace;
+    font-size: 1em;
+}
+
+#haltesDisplay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 40px;
+}
+
+#halteLijstDisplay {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 2em;
+}
+
+#halteLijstDisplay li {
+    margin: 8px 0;
+    opacity: 0.7;
+}
+
+#volgendeHalteDisplay {
+    font-size: 3em;
+    font-weight: bold;
+    color: #ff0;
+    margin-top: 30px;
+}
+
+#volgendeHalteDisplay::before {
+    content: "↓ ";
+}
+
+    </style>
 </head>
 <body>
-  <div id="instellingen" style="padding: 2rem;">
-    <h2>Instellingen</h2>
-    <input type="text" id="entiteit" placeholder="Entiteitnummer" />
-    <input type="text" id="lijnnummer" placeholder="Lijnnummer" />
-    <select id="richting">
-      <option value="HEEN">Heen</option>
-      <option value="TERUG">Terug</option>
-    </select>
-    <label><input type="checkbox" id="autoVervers" /> Locatie automatisch verversen</label><br><br>
-    <button onclick="startHaltescherm()">Toon Haltescherm</button>
-  </div>
 
-  <div id="haltescherm" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; padding: 2rem;">
-    <div id="halteweergave" style="font-size: 3rem; margin-bottom: 2rem;"></div>
-    <div id="parelsnoer"></div>
-  </div>
+<div id="displayMode" style="display: none;">
+    <div id="displayTop">
+        <div id="lijnnummerVak"></div>
+        <div id="bestemmingVak"></div>
+        <div id="klokVak"></div>
+    </div>
+    <div id="haltesDisplay">
+        <ul id="halteLijstDisplay"></ul>
+        <div id="volgendeHalteDisplay"></div>
+    </div>
+</div>
+  
+<div id="formContainer">
+    <h1>Haltes</h1>
+    <form id="halteForm">
+        <label>Entiteit:<input type="text" id="entiteit" required></label>
+        <label>Lijnnummer:<input type="text" id="lijnnummer" required></label>
+        <label>Richting:
+            <select id="richting" required>
+                <option value="HEEN">HEEN</option>
+                <option value="TERUG">TERUG</option>
+            </select>
+        </label>
+        <button type="submit">Toon haltes</button>
+    </form>
+
+    <div id="locatieControls">
+        <button id="vernieuwLocatie">📍 Locatie vernieuwen</button>
+        <div class="toggle">
+            <input type="checkbox" id="autoRefresh" />
+            <label for="autoRefresh">Automatisch elke 15s</label>
+        </div>
+      <button id="toonDisplayMode">🖥️ Toon displaymodus</button>
+    </div>
+</div>
+
+<div id="resultaat"><h2>Resultaat:</h2></div>
+
+<script>
+    let haltes = [];
+    let markerHalte = null;
+    let autoRefreshInterval = null;
+
+    async function getUserLocation() {
+        return new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+                pos => resolve(pos.coords),
+                err => reject(err),
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        });
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000;
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function markeerDichtstbijzijndeHalte(userCoords) {
+        if (haltes.length === 0 || !userCoords) return;
+
+        let dichtste = haltes[0];
+        let minAfstand = calculateDistance(userCoords.latitude, userCoords.longitude, dichtste.geoCoordinaat.latitude, dichtste.geoCoordinaat.longitude);
+
+        haltes.forEach(h => {
+            const afstand = calculateDistance(userCoords.latitude, userCoords.longitude, h.geoCoordinaat.latitude, h.geoCoordinaat.longitude);
+            if (afstand < minAfstand) {
+                dichtste = h;
+                minAfstand = afstand;
+            }
+        });
+
+        markerHalte = dichtste;
+        toonHaltes();
+    }
+
+    function toonHaltes() {
+        const container = document.getElementById('resultaat');
+        container.innerHTML = "";
+
+        let vorigeGemeente = null;
+        let volgende = false;
+
+        haltes.forEach((halte) => {
+            if (halte.omschrijvingGemeente !== vorigeGemeente) {
+                const gemeenteHeader = document.createElement('div');
+                gemeenteHeader.className = 'gemeente';
+                gemeenteHeader.textContent = halte.omschrijvingGemeente;
+                container.appendChild(gemeenteHeader);
+                vorigeGemeente = halte.omschrijvingGemeente;
+            }
+
+            const halteItem = document.createElement('li');
+            halteItem.id = `halte-${halte.haltenummer}`;
+            halteItem.textContent = `${halte.omschrijvingGemeente}, ${halte.omschrijvingLang || halte.omschrijving}`;
+
+            if (markerHalte && halte.haltenummer === markerHalte.haltenummer) {
+                halteItem.classList.add('marker');
+                volgende = true;
+                setTimeout(() => {
+                    halteItem.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 100);
+            } else if (volgende) {
+                halteItem.classList.add('volgende');
+                volgende = false;
+            }
+
+            container.appendChild(halteItem);
+        });
+    }
+
+    document.getElementById('halteForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const entiteit = document.getElementById('entiteit').value;
+        const lijnnummer = document.getElementById('lijnnummer').value;
+        const richting = document.getElementById('richting').value;
+        const url = `https://api.delijn.be/DLKernOpenData/api/v1/lijnen/${entiteit}/${lijnnummer}/lijnrichtingen/${richting}/haltes`;
+        const apiKey = "ee23ac060f8a4038ad6d69358d85a1b0";
+
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    "Cache-Control": "no-cache",
+                    "Ocp-Apim-Subscription-Key": apiKey
+                }
+            });
+
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            const data = await response.json();
+            haltes = data.haltes;
+
+            try {
+                const userCoords = await getUserLocation();
+                markeerDichtstbijzijndeHalte(userCoords);
+            } catch {
+                markerHalte = haltes[0];
+                toonHaltes();
+            }
+
+        } catch (error) {
+            document.getElementById('resultaat').innerHTML = `<p style="color: red;">Fout: ${error.message}</p>`;
+        }
+    });
+
+    document.getElementById('vernieuwLocatie').addEventListener('click', async () => {
+        try {
+            const userCoords = await getUserLocation();
+            markeerDichtstbijzijndeHalte(userCoords);
+        } catch (err) {
+            alert("Kon locatie niet ophalen.");
+        }
+    });
+
+    document.getElementById('autoRefresh').addEventListener('change', function () {
+        if (this.checked) {
+            autoRefreshInterval = setInterval(async () => {
+                try {
+                    const userCoords = await getUserLocation();
+                    markeerDichtstbijzijndeHalte(userCoords);
+                } catch {}
+            }, 15000);
+        } else {
+            clearInterval(autoRefreshInterval);
+        }
+    });
+  document.getElementById('toonDisplayMode').addEventListener('click', () => {
+    toonDisplayMode();
+});
+
+function updateKlok() {
+    const nu = new Date();
+    const uren = String(nu.getHours()).padStart(2, '0');
+    const minuten = String(nu.getMinutes()).padStart(2, '0');
+    document.getElementById("klokVak").textContent = `${uren}:${minuten}`;
+}
+setInterval(updateKlok, 1000);
+
+function toonDisplayMode() {
+    if (haltes.length === 0) return alert("Geen haltes geladen.");
+
+    const display = document.getElementById("displayMode");
+    display.style.display = "flex";
+
+    const entiteit = document.getElementById("entiteit").value.toLowerCase();
+    const lijnnummer = document.getElementById("lijnnummer").value;
+    document.getElementById("lijnnummerVak").textContent = `${entiteit}${lijnnummer}`;
+
+    const laatsteHalte = haltes[haltes.length - 1];
+    document.getElementById("bestemmingVak").textContent = laatsteHalte.omschrijvingLang || laatsteHalte.omschrijving;
+
+    const volgendeIndex = haltes.findIndex(h => h.haltenummer === markerHalte?.haltenummer);
+    const volgendeHalte = haltes[volgendeIndex];
+    const zevenHaltes = haltes.slice(volgendeIndex + 1, volgendeIndex + 8);
+
+    const halteLijst = document.getElementById("halteLijstDisplay");
+    halteLijst.innerHTML = "";
+    zevenHaltes.forEach(h => {
+        const li = document.createElement("li");
+        li.textContent = h.omschrijvingLang || h.omschrijving;
+        halteLijst.appendChild(li);
+    });
+
+    document.getElementById("volgendeHalteDisplay").textContent = volgendeHalte?.omschrijvingLang || volgendeHalte?.omschrijving || "Onbekend";
+}
+
+</script>
+
 </body>
 </html>
