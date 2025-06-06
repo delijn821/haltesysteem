@@ -123,8 +123,8 @@
     top: 0; left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: #000;
-    color: #fff;
+    background-color: #fff;
+    color: #333;
     font-family: 'Segoe UI', sans-serif;
     display: flex;
     flex-direction: column;
@@ -136,8 +136,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 30px;
-    font-size: 3em;
+    padding: 10px 20px; /* Verklein de padding */
+    font-size: 2em; /* Verklein de lettergrootte */
     background-color: #222;
 }
 
@@ -279,39 +279,44 @@
     }
 
     function toonHaltes() {
-        const container = document.getElementById('resultaat');
-        container.innerHTML = "";
+    const container = document.getElementById('resultaat');
+    container.innerHTML = "";
 
-        let vorigeGemeente = null;
-        let volgende = false;
+    let vorigeGemeente = null;
+    let volgende = false;
 
-        haltes.forEach((halte) => {
-            if (halte.omschrijvingGemeente !== vorigeGemeente) {
-                const gemeenteHeader = document.createElement('div');
-                gemeenteHeader.className = 'gemeente';
-                gemeenteHeader.textContent = halte.omschrijvingGemeente;
-                container.appendChild(gemeenteHeader);
-                vorigeGemeente = halte.omschrijvingGemeente;
-            }
+    const ul = document.createElement('ul'); // Maak een ul-element aan
 
-            const halteItem = document.createElement('li');
-            halteItem.id = `halte-${halte.haltenummer}`;
-            halteItem.textContent = `${halte.omschrijvingGemeente}, ${halte.omschrijvingLang || halte.omschrijving}`;
+    haltes.forEach((halte) => {
+        if (halte.omschrijvingGemeente !== vorigeGemeente) {
+            const gemeenteHeader = document.createElement('div');
+            gemeenteHeader.className = 'gemeente';
+            gemeenteHeader.textContent = halte.omschrijvingGemeente;
+            container.appendChild(gemeenteHeader);
+            vorigeGemeente = halte.omschrijvingGemeente;
+        }
 
-            if (markerHalte && halte.haltenummer === markerHalte.haltenummer) {
-                halteItem.classList.add('marker');
-                volgende = true;
-                setTimeout(() => {
-                    halteItem.scrollIntoView({ behavior: "smooth", block: "center" });
-                }, 100);
-            } else if (volgende) {
-                halteItem.classList.add('volgende');
-                volgende = false;
-            }
+        const halteItem = document.createElement('li');
+        halteItem.id = `halte-${halte.haltenummer}`;
+        halteItem.textContent = `${halte.omschrijvingLang || halte.omschrijving}`;
 
-            container.appendChild(halteItem);
-        });
-    }
+        if (markerHalte && halte.haltenummer === markerHalte.haltenummer) {
+            halteItem.classList.add('marker');
+            volgende = true;
+            setTimeout(() => {
+                halteItem.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 100);
+        } else if (volgende) {
+            halteItem.classList.add('volgende');
+            volgende = false;
+        }
+
+        ul.appendChild(halteItem); // Voeg het li-element toe aan de ul
+    });
+
+    container.appendChild(ul); // Voeg de ul toe aan de container
+}
+
 
     document.getElementById('halteForm').addEventListener('submit', async e => {
         e.preventDefault();
