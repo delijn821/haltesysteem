@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Lijn X60 — Boom Station</title>
+<style>
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Bold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+
+body {
+    font-family: 'FlandersArtSans', Arial, sans-serif;
+    background-color: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 2%;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.line-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.line-box {
+    background-color: #E6007E;
+    color: #FFFFFF;
+    -webkit-text-stroke: 2px #000;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 4.5em;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.destination {
+    font-size: 3.5em;
+    font-weight: 600;
+}
+
+.clock {
+    font-size: 3.5em;
+}
+
+.stops {
+    display: flex;
+    padding-top: 3%;
+    flex-grow: 1;
+    overflow: hidden;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 2em;
+    width: 100%;
+    text-align: left;
+}
+
+.stop {
+    background-color: #333;
+    border-radius: 15px;
+    padding: 15px;
+}
+
+.footer {
+    font-size: 4.5em;
+    font-weight: 600;
+    margin-top: auto;
+    margin-bottom: 3%;
+    width: 100%;
+    text-align: center;
+    font-size: 2em;
+    padding: 2%;
+    border-top: 2px solid #444;
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="line-info">
+        <span class="line-box">X60</span>
+        <span class="destination">Boom Station</span>
+    </div>
+    <div class="clock" id="clock"></div>
+</div>
+
+<div class="stops" id="stops-container"></div>
+
+<div class="footer" id="next-stop">Volgende halte: —</div>
+
+<script>
+const haltes = [{"stop_name": "Brussel Noord opstaphalte", "stop_lat": 50.859255, "stop_lon": 4.359968}, {"stop_name": "Brussel Suzan Daniel", "stop_lat": 50.863241, "stop_lon": 4.349126}, {"stop_name": "Brussel Bockstael", "stop_lat": 50.875624, "stop_lon": 4.348265}, {"stop_name": "Brussel Station Bockstael", "stop_lat": 50.879506, "stop_lon": 4.347908}, {"stop_name": "Brussel Karel Bogaerd", "stop_lat": 50.881118, "stop_lon": 4.348231}, {"stop_name": "Londerzeel Kerkhofstraat/A12", "stop_lat": 50.998351, "stop_lon": 4.315053}, {"stop_name": "Londerzeel Acacialaan", "stop_lat": 51.000529, "stop_lon": 4.310819}, {"stop_name": "Londerzeel Rustoord", "stop_lat": 51.002578, "stop_lon": 4.306276}, {"stop_name": "Londerzeel Brandweer", "stop_lat": 51.004611, "stop_lon": 4.306117}, {"stop_name": "Londerzeel Chrysantenlaan", "stop_lat": 51.006309, "stop_lon": 4.301624}, {"stop_name": "Londerzeel Station perron 1", "stop_lat": 51.008794, "stop_lon": 4.298306}, {"stop_name": "Londerzeel Egmont & Hoorn", "stop_lat": 51.011346, "stop_lon": 4.299479}, {"stop_name": "Londerzeel Zwembad", "stop_lat": 51.010951, "stop_lon": 4.305184}, {"stop_name": "Londerzeel Politiehuis", "stop_lat": 51.012913, "stop_lon": 4.311157}, {"stop_name": "Londerzeel Industrie", "stop_lat": 51.017679, "stop_lon": 4.315561}, {"stop_name": "Londerzeel Molenhoek", "stop_lat": 51.023338, "stop_lon": 4.315949}, {"stop_name": "Breendonk Sint-Jozefstraat", "stop_lat": 51.033935, "stop_lon": 4.323582}, {"stop_name": "Breendonk Vijfhoek", "stop_lat": 51.038583, "stop_lon": 4.326035}, {"stop_name": "Breendonk Gemeentehuis", "stop_lat": 51.043266, "stop_lon": 4.325995}, {"stop_name": "Breendonk Vrijhals", "stop_lat": 51.046844, "stop_lon": 4.328352}, {"stop_name": "Breendonk Schaafstraat", "stop_lat": 51.052407, "stop_lon": 4.332883}, {"stop_name": "Breendonk Rijweg", "stop_lat": 51.057683, "stop_lon": 4.335218}, {"stop_name": "Breendonk De Winning", "stop_lat": 51.05986, "stop_lon": 4.331474}, {"stop_name": "Willebroek Fort van Breendonk", "stop_lat": 51.058954, "stop_lon": 4.34466}, {"stop_name": "Willebroek Bosbeek", "stop_lat": 51.059735, "stop_lon": 4.352467}, {"stop_name": "Willebroek Bibliotheek", "stop_lat": 51.062473, "stop_lon": 4.359448}, {"stop_name": "Willebroek Station perron 2", "stop_lat": 51.066838, "stop_lon": 4.354927}, {"stop_name": "Willebroek Appeldonkstraat", "stop_lat": 51.072949, "stop_lon": 4.348576}, {"stop_name": "Willebroek Brico", "stop_lat": 51.077076, "stop_lon": 4.353195}, {"stop_name": "Willebroek Klein Willebroek", "stop_lat": 51.083975, "stop_lon": 4.359977}, {"stop_name": "Boom Markt", "stop_lat": 51.086439, "stop_lon": 4.362118}, {"stop_name": "Boom Station perron 1", "stop_lat": 51.090203, "stop_lon": 4.360282}];
+let lastClosestIndex = 0;
+
+// Update klok
+function updateClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = hours + ':' + minutes;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Bereken afstand tussen 2 GPS-coördinaten (Haversine)
+function distance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Toon haltes op basis van dichtstbijzijnde
+function updateHaltes(userLat, userLon) {
+    let closestIndex = 0;
+    let minDist = distance(userLat, userLon, haltes[0].stop_lat, haltes[0].stop_lon);
+
+    for (let i = 1; i < haltes.length; i++) {
+        const d = distance(userLat, userLon, haltes[i].stop_lat, haltes[i].stop_lon);
+        if (d < minDist) {
+            minDist = d;
+            closestIndex = i;
+        }
+    }
+
+    // Alleen updaten als de gebruiker effectief opschuift
+    if (closestIndex > lastClosestIndex) {
+        lastClosestIndex = closestIndex;
+    }
+
+    const visible = haltes.slice(lastClosestIndex, lastClosestIndex + 5);
+    const container = document.getElementById('stops-container');
+    container.innerHTML = '';
+    visible.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'stop';
+        div.textContent = h.stop_name;
+        container.appendChild(div);
+    });
+
+    const nextStop = visible.length > 1 ? visible[1].stop_name : 'Eindhalte bereikt';
+    document.getElementById('next-stop').textContent = "Volgende halte: " + nextStop;
+}
+
+// Vraag GPS-locatie van apparaat
+function getLocationAndUpdate() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                updateHaltes(pos.coords.latitude, pos.coords.longitude);
+            },
+            err => {
+                console.warn("GPS-fout: " + err.message);
+                // fallback op eerste halte
+                updateHaltes(haltes[0].stop_lat, haltes[0].stop_lon);
+            }
+        );
+    } else {
+        console.warn("Geolocatie niet ondersteund");
+        updateHaltes(haltes[0].stop_lat, haltes[0].stop_lon);
+    }
+}
+
+getLocationAndUpdate();
+setInterval(getLocationAndUpdate, 15000);
+</script>
+</body>
+</html>
