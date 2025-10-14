@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Lijn R45 — Dendermonde Station</title>
+<style>
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Bold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+
+body {
+    font-family: 'FlandersArtSans', Arial, sans-serif;
+    background-color: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 2%;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.line-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.line-box {
+    background-color: #009CB4;
+    color: #000000;
+    -webkit-text-stroke: 2px #fff;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 4.5em;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.destination {
+    font-size: 3.5em;
+    font-weight: 600;
+}
+
+.clock {
+    font-size: 3.5em;
+}
+
+.stops {
+    display: flex;
+    padding-top: 3%;
+    flex-grow: 1;
+    overflow: hidden;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 2em;
+    width: 100%;
+    text-align: left;
+}
+
+.stop {
+    background-color: #333;
+    border-radius: 15px;
+    padding: 15px;
+}
+
+.footer {
+    font-size: 4.5em;
+    font-weight: 600;
+    margin-top: auto;
+    margin-bottom: 3%;
+    width: 100%;
+    text-align: center;
+    font-size: 2em;
+    padding: 2%;
+    border-top: 2px solid #444;
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="line-info">
+        <span class="line-box">R45</span>
+        <span class="destination">Dendermonde Station</span>
+    </div>
+    <div class="clock" id="clock"></div>
+</div>
+
+<div class="stops" id="stops-container"></div>
+
+<div class="footer" id="next-stop">Volgende halte: —</div>
+
+<script>
+const haltes = [{"stop_name": "Brussel Noord opstaphalte", "stop_lat": 50.859255, "stop_lon": 4.359968}, {"stop_name": "Brussel WTC", "stop_lat": 50.861333, "stop_lon": 4.356159}, {"stop_name": "Brussel Suzan Daniel", "stop_lat": 50.863241, "stop_lon": 4.349126}, {"stop_name": "Brussel Andr\u00e9e De Jongh", "stop_lat": 50.870948, "stop_lon": 4.349321}, {"stop_name": "Brussel Poesjkin", "stop_lat": 50.870896, "stop_lon": 4.343935}, {"stop_name": "Brussel Nekkersdal", "stop_lat": 50.873976, "stop_lon": 4.346771}, {"stop_name": "Brussel Bockstael", "stop_lat": 50.875624, "stop_lon": 4.348265}, {"stop_name": "Brussel Station Bockstael", "stop_lat": 50.879506, "stop_lon": 4.347908}, {"stop_name": "Brussel Sobieski", "stop_lat": 50.884678, "stop_lon": 4.343887}, {"stop_name": "Jette De Greef", "stop_lat": 50.88332, "stop_lon": 4.335402}, {"stop_name": "Jette Ziekenhuis Brugmann", "stop_lat": 50.885882, "stop_lon": 4.332868}, {"stop_name": "Jette Crocq", "stop_lat": 50.885157, "stop_lon": 4.330623}, {"stop_name": "Jette Bonaventure", "stop_lat": 50.885072, "stop_lon": 4.321418}, {"stop_name": "Jette Oude Afspanning", "stop_lat": 50.885578, "stop_lon": 4.316446}, {"stop_name": "Jette UZ Brussel", "stop_lat": 50.886686, "stop_lon": 4.311612}, {"stop_name": "Jette UZ-Pediatrie", "stop_lat": 50.889653, "stop_lon": 4.309411}, {"stop_name": "Jette Dikke Beuk", "stop_lat": 50.892958, "stop_lon": 4.313312}, {"stop_name": "Wemmel I.Meyskens", "stop_lat": 50.8966, "stop_lon": 4.312488}, {"stop_name": "Wemmel Cdt. J. De Blockplein", "stop_lat": 50.899081, "stop_lon": 4.312454}, {"stop_name": "Wemmel Ronkel", "stop_lat": 50.902407, "stop_lon": 4.307845}, {"stop_name": "Wemmel Kapelleke", "stop_lat": 50.904477, "stop_lon": 4.304133}, {"stop_name": "Wemmel Zandloper", "stop_lat": 50.908244, "stop_lon": 4.300608}, {"stop_name": "Wemmel Windberg", "stop_lat": 50.914295, "stop_lon": 4.295823}, {"stop_name": "Hamme Lindestraat", "stop_lat": 50.918295, "stop_lon": 4.288998}, {"stop_name": "Hamme Guduladreef", "stop_lat": 50.920183, "stop_lon": 4.283333}, {"stop_name": "Brussegem Ossel Dorp", "stop_lat": 50.922229, "stop_lon": 4.279179}, {"stop_name": "Brussegem Kerkhof", "stop_lat": 50.924958, "stop_lon": 4.270053}, {"stop_name": "Brussegem Noorden", "stop_lat": 50.926583, "stop_lon": 4.264414}, {"stop_name": "Brussegem Koster", "stop_lat": 50.931975, "stop_lon": 4.255208}, {"stop_name": "Brussegem Bosbeek Sarten", "stop_lat": 50.940563, "stop_lon": 4.248909}, {"stop_name": "Merchtem Koeweidestraat", "stop_lat": 50.945957, "stop_lon": 4.246496}, {"stop_name": "Merchtem Dooren", "stop_lat": 50.956738, "stop_lon": 4.250987}, {"stop_name": "Merchtem Drypikkel", "stop_lat": 50.959089, "stop_lon": 4.242975}, {"stop_name": "Merchtem Bleukenweg", "stop_lat": 50.960634, "stop_lon": 4.237673}, {"stop_name": "Merchtem Varkensmarkt (vervanghalte)", "stop_lat": 50.959488, "stop_lon": 4.233954}, {"stop_name": "Merchtem Ter Dreef", "stop_lat": 50.962448, "stop_lon": 4.231412}, {"stop_name": "Merchtem Sint-Janstraat", "stop_lat": 50.966478, "stop_lon": 4.23225}, {"stop_name": "Merchtem Koutermolen", "stop_lat": 50.974151, "stop_lon": 4.231411}, {"stop_name": "Peizegem Tuinbouwschool", "stop_lat": 50.979176, "stop_lon": 4.231023}, {"stop_name": "Peizegem Kerkplein", "stop_lat": 50.98385, "stop_lon": 4.224487}, {"stop_name": "Merchtem Nachtegalenhoek", "stop_lat": 50.986228, "stop_lon": 4.216237}, {"stop_name": "Buggenhout Nieuw Bos", "stop_lat": 50.992438, "stop_lon": 4.213151}, {"stop_name": "Buggenhout Boskapel", "stop_lat": 50.998081, "stop_lon": 4.210765}, {"stop_name": "Buggenhout Kalkenstraat", "stop_lat": 51.005692, "stop_lon": 4.207547}, {"stop_name": "Buggenhout Leemputten", "stop_lat": 51.009954, "stop_lon": 4.204924}, {"stop_name": "Buggenhout Station", "stop_lat": 51.01596, "stop_lon": 4.20208}, {"stop_name": "Buggenhout Kamerstraat", "stop_lat": 51.02004, "stop_lon": 4.199948}, {"stop_name": "Buggenhout Heuvelweg", "stop_lat": 51.022228, "stop_lon": 4.192522}, {"stop_name": "Buggenhout Diepmeerstraat", "stop_lat": 51.029954, "stop_lon": 4.186484}, {"stop_name": "Baasrode Noord Station", "stop_lat": 51.029307, "stop_lon": 4.179355}, {"stop_name": "Baasrode Vermylenstraat", "stop_lat": 51.0337, "stop_lon": 4.172081}, {"stop_name": "Baasrode Dorp", "stop_lat": 51.036512, "stop_lon": 4.166494}, {"stop_name": "Baasrode Rosstraat", "stop_lat": 51.037919, "stop_lon": 4.160544}, {"stop_name": "Baasrode Broekkouter", "stop_lat": 51.03863, "stop_lon": 4.154713}, {"stop_name": "Baasrode Broekstraat", "stop_lat": 51.039372, "stop_lon": 4.146507}, {"stop_name": "Baasrode Weg Naar Vlassenbroek", "stop_lat": 51.038736, "stop_lon": 4.137999}, {"stop_name": "Dendermonde Hoogveld", "stop_lat": 51.037707, "stop_lon": 4.129526}, {"stop_name": "Dendermonde Korte Dijkstraat", "stop_lat": 51.036375, "stop_lon": 4.119864}, {"stop_name": "Dendermonde Kroonveldlaan", "stop_lat": 51.033354, "stop_lon": 4.109643}, {"stop_name": "Dendermonde Oude Vest", "stop_lat": 51.031456, "stop_lon": 4.10661}, {"stop_name": "Dendermonde Brusselsestraat", "stop_lat": 51.025381, "stop_lon": 4.10145}, {"stop_name": "Dendermonde Station perron 4", "stop_lat": 51.023237, "stop_lon": 4.100337}];
+let lastClosestIndex = 0;
+
+// Update klok
+function updateClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = hours + ':' + minutes;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Bereken afstand tussen 2 GPS-coördinaten (Haversine)
+function distance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Toon haltes op basis van dichtstbijzijnde
+function updateHaltes(userLat, userLon) {
+    let closestIndex = 0;
+    let minDist = distance(userLat, userLon, haltes[0].stop_lat, haltes[0].stop_lon);
+
+    for (let i = 1; i < haltes.length; i++) {
+        const d = distance(userLat, userLon, haltes[i].stop_lat, haltes[i].stop_lon);
+        if (d < minDist) {
+            minDist = d;
+            closestIndex = i;
+        }
+    }
+
+    // Alleen updaten als de gebruiker effectief opschuift
+    if (closestIndex > lastClosestIndex) {
+        lastClosestIndex = closestIndex;
+    }
+
+    const visible = haltes.slice(lastClosestIndex, lastClosestIndex + 5);
+    const container = document.getElementById('stops-container');
+    container.innerHTML = '';
+    visible.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'stop';
+        div.textContent = h.stop_name;
+        container.appendChild(div);
+    });
+
+    const nextStop = visible.length > 1 ? visible[1].stop_name : 'Eindhalte bereikt';
+    document.getElementById('next-stop').textContent = "Volgende halte: " + nextStop;
+}
+
+// Vraag GPS-locatie van apparaat
+function getLocationAndUpdate() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                updateHaltes(pos.coords.latitude, pos.coords.longitude);
+            },
+            err => {
+                console.warn("GPS-fout: " + err.message);
+                // fallback op eerste halte
+                updateHaltes(haltes[0].stop_lat, haltes[0].stop_lon);
+            }
+        );
+    } else {
+        console.warn("Geolocatie niet ondersteund");
+        updateHaltes(haltes[0].stop_lat, haltes[0].stop_lon);
+    }
+}
+
+getLocationAndUpdate();
+setInterval(getLocationAndUpdate, 15000);
+</script>
+</body>
+</html>
