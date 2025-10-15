@@ -165,8 +165,8 @@ function renderStops(startIndex) {
         div.textContent = h.stop_name;
         container.appendChild(div);
     });
-    const nextStop = visible.length > 1 ? visible[1].stop_name : 'Eindhalte bereikt';
-    document.getElementById('next-stop').textContent = "Volgende halte: " + currentIndex;
+    const nextStop = visible.length > 1 ? visible[0].stop_name : 'Eindhalte bereikt';
+    document.getElementById('next-stop').textContent = "Volgende halte: " + nextStop;
 }
 
 // initial render
@@ -303,6 +303,7 @@ setInterval(getLocationAndUpdate, 5000);
 </script>
 </body>
 </html>
+
 
 
 
