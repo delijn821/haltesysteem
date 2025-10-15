@@ -130,6 +130,10 @@ let lastClosestIndex = 0;
 let prevNextDist = null;
 // onthoud vorige afstand naar "current" (optioneel, kan gebruikt voor logging/extra checks)
 let prevCurrentDist = null;
+let lastDistanceToCurrent = null;
+let currentStopScreenActivate = false;
+let sanityInterval = 30000; // 30 sec
+
 
 // Update klok
 function updateClock() {
@@ -239,6 +243,60 @@ function getLocationAndUpdate() {
         updateHaltes(parseFloat(haltes[0].stop_lat), parseFloat(haltes[0].stop_lon));
     }
 }
+
+function updateHaltes(userLat, userLon) {
+    if (!haltes || haltes.length === 0) return;
+
+    const currentIndex = lastClosestIndex;
+    const nextIndex = Math.min(currentIndex + 1, haltes.length - 1);
+
+    const currentStop = haltes[currentIndex];
+    const nextStop = haltes[nextIndex];
+
+    const distCurrent = distance(userLat, userLon, currentStop.stop_lat, currentStop.stop_lon);
+    const distNext = nextStop ? distance(userLat, userLon, nextStop.stop_lat, nextStop.stop_lon) : Infinity;
+
+    // Activeer currentStopScreenActivate als binnen 100m en afstand afneemt
+    if (distCurrent < 100 && (lastDistanceToCurrent === null || distCurrent < lastDistanceToCurrent)) {
+        currentStopScreenActivate = true;
+    }
+
+    // Als de afstand tot huidige stop >30m en weer begint te stijgen, en afstand tot volgende afneemt -> opschuiven
+    if (currentStopScreenActivate && distCurrent > 30 && lastDistanceToCurrent !== null && distCurrent > lastDistanceToCurrent && distNext < previousDistanceToNext) {
+        lastClosestIndex = nextIndex;
+        currentStopScreenActivate = false; // reset voor volgende halte
+        renderStops(lastClosestIndex);
+        console.log("➡️ Opschuiven naar:", haltes[lastClosestIndex].stop_name);
+    }
+
+    lastDistanceToCurrent = distCurrent;
+    previousDistanceToNext = distNext;
+}
+
+function sanityCheck(userLat, userLon) {
+    if (!haltes || haltes.length === 0) return;
+
+    // Controleer de afstand tot vorige, huidige en volgende halte
+    const prevIndex = Math.max(0, lastClosestIndex - 1);
+    const nextIndex = Math.min(lastClosestIndex + 1, haltes.length - 1);
+
+    const distPrev = distance(userLat, userLon, haltes[prevIndex].stop_lat, haltes[prevIndex].stop_lon);
+    const distCurrent = distance(userLat, userLon, haltes[lastClosestIndex].stop_lat, haltes[lastClosestIndex].stop_lon);
+    const distNext = distance(userLat, userLon, haltes[nextIndex].stop_lat, haltes[nextIndex].stop_lon);
+
+    // Als de gebruiker duidelijk dichter bij een andere halte is, corrigeer lastClosestIndex
+    if (distPrev < distCurrent && distPrev < distNext) lastClosestIndex = prevIndex;
+    else if (distNext < distCurrent && distNext < distPrev) lastClosestIndex = nextIndex;
+
+    renderStops(lastClosestIndex);
+}
+setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+        pos => sanityCheck(pos.coords.latitude, pos.coords.longitude),
+        err => console.warn("Sanity GPS-fout:", err.message)
+    );
+}, sanityInterval);
+
 
 // eerste aanroep + interval
 getLocationAndUpdate();
