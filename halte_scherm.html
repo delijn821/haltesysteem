@@ -3,7 +3,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>Lijn 40 - Aalst Station</title>
+<title>Lijn 21 - Merchtem Mieregem</title>
 <style>
 
 @font-face {
@@ -39,7 +39,7 @@ body {
     height: 100vh;
     margin: 0;
     overflow: hidden;
-    padding-top: 3%;
+    padding-top: 2.75%;
     padding-left: 5%;
     padding-right: 5%;
 }
@@ -58,9 +58,9 @@ body {
 }
 
 .line-box {
-    background-color: #15882E;
-    color: #FFFFFF;
-    -webkit-text-stroke: 2px #000;
+    background-color: #C8D300;
+    color: #000000;
+    -webkit-text-stroke: 2px #fff;
     padding: 5px 20px;
     border-radius: 25px;
     font-size: 4.75em;
@@ -101,19 +101,30 @@ body {
     font-size: 3em;
     font-weight: 500;
     margin-top: auto;
-    margin-bottom: 3%;
+    margin-bottom: 3.25%;
     width: 100%;
     text-align: center;
     padding: 2%;
     border-top: 2px solid #444;
 }
+
+.current-stop {
+    font-size: 2em;
+    font-weight: 500;
+    margin-top: 3.25%;
+    margin-bottom: 3.25%;
+    width: 100%;
+    text-align: center;
+    padding: 2%;
+}
+
 </style>
 </head>
 <body>
 <div class="header">
     <div class="line-info">
-        <span class="line-box">40</span>
-        <span class="destination">Aalst Station</span>
+        <span class="line-box">21</span>
+        <span class="destination">Merchtem Mieregem</span>
     </div>
     <div class="clock" id="clock"></div>
 </div>
@@ -123,7 +134,7 @@ body {
 <div class="footer" id="next-stop">Volgende halte: —</div>
 
 <script>
-const haltes = [{"stop_name": "Londerzeel Station perron 4", "stop_lat": 51.008762, "stop_lon": 4.298598}, {"stop_name": "Londerzeel Chrysantenlaan", "stop_lat": 51.005627, "stop_lon": 4.302018}, {"stop_name": "Londerzeel Dorpsstraat", "stop_lat": 51.004133, "stop_lon": 4.301139}, {"stop_name": "Londerzeel Tramstraat", "stop_lat": 51.003171, "stop_lon": 4.295993}, {"stop_name": "Londerzeel Kapel Linde", "stop_lat": 51.002546, "stop_lon": 4.28623}, {"stop_name": "Londerzeel Lakeman", "stop_lat": 50.995729, "stop_lon": 4.282364}, {"stop_name": "Steenhuffel Kerk", "stop_lat": 50.995276, "stop_lon": 4.268671}, {"stop_name": "Steenhuffel Schoolstraat", "stop_lat": 50.993528, "stop_lon": 4.262054}, {"stop_name": "Steenhuffel Bontestraat", "stop_lat": 50.981787, "stop_lon": 4.253871}, {"stop_name": "Merchtem Molenstraat", "stop_lat": 50.975336, "stop_lon": 4.243916}, {"stop_name": "Merchtem Terlinden", "stop_lat": 50.969871, "stop_lon": 4.236543}, {"stop_name": "Merchtem Koutermolen", "stop_lat": 50.974151, "stop_lon": 4.231411}, {"stop_name": "Peizegem Tuinbouwschool", "stop_lat": 50.979176, "stop_lon": 4.231023}, {"stop_name": "Peizegem Kerkplein", "stop_lat": 50.98385, "stop_lon": 4.224487}, {"stop_name": "Peizegem Tuinbouwschool", "stop_lat": 50.979884, "stop_lon": 4.230051}, {"stop_name": "Merchtem Koutermolen", "stop_lat": 50.974807, "stop_lon": 4.231051}, {"stop_name": "Merchtem Sint-Janstraat", "stop_lat": 50.966218, "stop_lon": 4.231879}, {"stop_name": "Merchtem Ter Dreef", "stop_lat": 50.962546, "stop_lon": 4.231267}, {"stop_name": "Merchtem Burchtlaan", "stop_lat": 50.960863, "stop_lon": 4.233199}, {"stop_name": "Merchtem Varkensmarkt", "stop_lat": 50.958575, "stop_lon": 4.232357}, {"stop_name": "Merchtem Spiegellaan", "stop_lat": 50.961523, "stop_lon": 4.226389}, {"stop_name": "Opwijk Overweg", "stop_lat": 50.962736, "stop_lon": 4.213514}, {"stop_name": "Opwijk Klei", "stop_lat": 50.962114, "stop_lon": 4.208329}, {"stop_name": "Opwijk Steenweg op Merchtem", "stop_lat": 50.961539, "stop_lon": 4.202516}, {"stop_name": "Opwijk Hollestraat", "stop_lat": 50.966065, "stop_lon": 4.198062}, {"stop_name": "Opwijk Fabriekstraat", "stop_lat": 50.971657, "stop_lon": 4.189992}, {"stop_name": "Opwijk Station perron 1", "stop_lat": 50.974439, "stop_lon": 4.187542}, {"stop_name": "Opwijk Heirbaan", "stop_lat": 50.974496, "stop_lon": 4.18316}, {"stop_name": "Opwijk Marktstraat", "stop_lat": 50.971485, "stop_lon": 4.186684}, {"stop_name": "Opwijk Klaarstraat", "stop_lat": 50.969861, "stop_lon": 4.180306}, {"stop_name": "Opwijk Wijngaardstraat", "stop_lat": 50.968017, "stop_lon": 4.168196}, {"stop_name": "Opwijk Dageraadweg", "stop_lat": 50.966848, "stop_lon": 4.162734}, {"stop_name": "Opwijk Nijverseelstraat", "stop_lat": 50.962371, "stop_lon": 4.157055}, {"stop_name": "Opwijk Steenweg op Dendermonde", "stop_lat": 50.960848, "stop_lon": 4.153284}, {"stop_name": "Baardegem Melkspinde", "stop_lat": 50.957843, "stop_lon": 4.144669}, {"stop_name": "Baardegem Kerk", "stop_lat": 50.953984, "stop_lon": 4.140931}, {"stop_name": "Baardegem Bieseweide", "stop_lat": 50.951487, "stop_lon": 4.137331}, {"stop_name": "Baardegem Elderberg", "stop_lat": 50.951488, "stop_lon": 4.133813}, {"stop_name": "Meldert Kammenkouterstraat", "stop_lat": 50.949833, "stop_lon": 4.122077}, {"stop_name": "Meldert Koeisteert", "stop_lat": 50.948097, "stop_lon": 4.112951}, {"stop_name": "Moorsel Berggouw", "stop_lat": 50.950336, "stop_lon": 4.108141}, {"stop_name": "Moorsel Leirekenstraat", "stop_lat": 50.950684, "stop_lon": 4.10232}, {"stop_name": "Moorsel Dorp", "stop_lat": 50.947861, "stop_lon": 4.097941}, {"stop_name": "Moorsel Ten Berg", "stop_lat": 50.945718, "stop_lon": 4.092693}, {"stop_name": "Moorsel Koebrugstraat", "stop_lat": 50.944546, "stop_lon": 4.084117}, {"stop_name": "Aalst Achterweg", "stop_lat": 50.945473, "stop_lon": 4.073741}, {"stop_name": "Aalst Paardendries", "stop_lat": 50.944559, "stop_lon": 4.064025}, {"stop_name": "Aalst AZORG Moorselbaan", "stop_lat": 50.942912, "stop_lon": 4.055527}, {"stop_name": "Aalst Groenstraat", "stop_lat": 50.943891, "stop_lon": 4.048365}, {"stop_name": "Aalst Een Meistraat", "stop_lat": 50.94207, "stop_lon": 4.044431}, {"stop_name": "Aalst Station perron 1", "stop_lat": 50.942368, "stop_lon": 4.040014}];
+const haltes = [{"stop_name": "Zaventem Brussels Airport perron B", "stop_lat": 50.898126, "stop_lon": 4.481982}, {"stop_name": "Zaventem Technics Noord", "stop_lat": 50.896327, "stop_lon": 4.475245}, {"stop_name": "Zaventem Gebouw 9", "stop_lat": 50.894835, "stop_lon": 4.469687}, {"stop_name": "Zaventem B-House", "stop_lat": 50.89484, "stop_lon": 4.463833}, {"stop_name": "Machelen Korenberg", "stop_lat": 50.896548, "stop_lon": 4.455599}, {"stop_name": "Machelen Sector 8", "stop_lat": 50.896533, "stop_lon": 4.450413}, {"stop_name": "Machelen Cargo West", "stop_lat": 50.902183, "stop_lon": 4.447043}, {"stop_name": "Machelen Cargo Post Zuid", "stop_lat": 50.904142, "stop_lon": 4.452319}, {"stop_name": "Machelen Cargo 706", "stop_lat": 50.906084, "stop_lon": 4.456959}, {"stop_name": "Machelen Cargo Discount P1", "stop_lat": 50.906036, "stop_lon": 4.460796}, {"stop_name": "Machelen Heirbaan", "stop_lat": 50.918173, "stop_lon": 4.448342}, {"stop_name": "Vilvoorde Levis", "stop_lat": 50.923318, "stop_lon": 4.442032}, {"stop_name": "Vilvoorde Fabrieksstraat", "stop_lat": 50.925759, "stop_lon": 4.43554}, {"stop_name": "Vilvoorde Station perron 3", "stop_lat": 50.924292, "stop_lon": 4.432136}, {"stop_name": "Vilvoorde Heldenplein", "stop_lat": 50.926574, "stop_lon": 4.42511}, {"stop_name": "Vilvoorde Kassei", "stop_lat": 50.922986, "stop_lon": 4.415389}, {"stop_name": "Vilvoorde Breemput", "stop_lat": 50.923773, "stop_lon": 4.408962}, {"stop_name": "Grimbergen Oude Schapenbaan", "stop_lat": 50.925594, "stop_lon": 4.397395}, {"stop_name": "Grimbergen Delhaize", "stop_lat": 50.927259, "stop_lon": 4.389917}, {"stop_name": "Grimbergen Klont", "stop_lat": 50.930069, "stop_lon": 4.381008}, {"stop_name": "Grimbergen Abdij", "stop_lat": 50.93436, "stop_lon": 4.372109}, {"stop_name": "Grimbergen Stelplaats perron 2", "stop_lat": 50.935886, "stop_lon": 4.363523}, {"stop_name": "Grimbergen Waardbeek", "stop_lat": 50.937821, "stop_lon": 4.356881}, {"stop_name": "Grimbergen Biesthoek", "stop_lat": 50.938948, "stop_lon": 4.351661}, {"stop_name": "Meise Dreef", "stop_lat": 50.940197, "stop_lon": 4.345905}, {"stop_name": "Meise Limbos", "stop_lat": 50.941939, "stop_lon": 4.337812}, {"stop_name": "Meise Oratorienlaan", "stop_lat": 50.938151, "stop_lon": 4.332472}, {"stop_name": "Meise De Donderstraat", "stop_lat": 50.93768, "stop_lon": 4.32793}, {"stop_name": "Meise Van Dievoetlaan", "stop_lat": 50.94092, "stop_lon": 4.324307}, {"stop_name": "Meise Oppem-Hasselt", "stop_lat": 50.943437, "stop_lon": 4.318756}, {"stop_name": "Meise Hasseltbergstraat", "stop_lat": 50.941005, "stop_lon": 4.314328}, {"stop_name": "Meise Oppem Kerk", "stop_lat": 50.939134, "stop_lon": 4.305628}, {"stop_name": "Wolvertem Oppemse Hoeve", "stop_lat": 50.943158, "stop_lon": 4.304876}, {"stop_name": "Wolvertem Kerkhof", "stop_lat": 50.94875, "stop_lon": 4.306945}, {"stop_name": "Wolvertem Gemeenteplein", "stop_lat": 50.950797, "stop_lon": 4.309282}, {"stop_name": "Wolvertem Driesstraat", "stop_lat": 50.952174, "stop_lon": 4.302176}, {"stop_name": "Wolvertem Meuzegemstraat", "stop_lat": 50.952193, "stop_lon": 4.293936}, {"stop_name": "Merchtem Kleistraat", "stop_lat": 50.951722, "stop_lon": 4.268004}, {"stop_name": "Merchtem Dooren", "stop_lat": 50.956738, "stop_lon": 4.250987}, {"stop_name": "Merchtem Drypikkel", "stop_lat": 50.959089, "stop_lon": 4.242975}, {"stop_name": "Merchtem Bleukenweg", "stop_lat": 50.960634, "stop_lon": 4.237673}, {"stop_name": "Merchtem Varkensmarkt", "stop_lat": 50.958575, "stop_lon": 4.232357}, {"stop_name": "Merchtem Mieregem", "stop_lat": 50.956119, "stop_lon": 4.231682}];
 // index van de halte die momenteel als "huidige" wordt beschouwd in de lijst
 let lastClosestIndex = 0;
 // onthoud vorige afstand naar "next" stop om te vergelijken of die afneemt
@@ -133,6 +144,7 @@ let prevCurrentDist = null;
 let lastDistanceToCurrent = null;
 let currentStopScreen = false;
 let sanityInterval = 300000;
+let previousDistanceToNext = null; 
 
 // Update klok
 function updateClock() {
@@ -198,6 +210,25 @@ function getLocationAndUpdate() {
     }
 }
 
+function renderCurrentStop(currentIndex) {
+    const container = document.getElementById('stops-container');
+    const currentStop = haltes[currentIndex];
+    const nextIndex = Math.min(currentIndex + 1, haltes.length - 1);
+    const nextStop = haltes[nextIndex];
+
+    // Standaard stops verbergen
+    container.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'current-stop';
+    div.innerHTML = "Huidige halte:<br>" + currentStop.stop_name;
+    container.appendChild(div);
+
+    // Footer aanpassen
+    document.getElementById('next-stop').textContent =
+        "Volgende halte: " + (nextStop ? nextStop.stop_name : "Eindhalte bereikt");
+}
+
+
 function updateHaltes(userLat, userLon) {
     if (!haltes || haltes.length === 0) return;
 
@@ -210,15 +241,17 @@ function updateHaltes(userLat, userLon) {
     const distCurrent = distance(userLat, userLon, currentStop.stop_lat, currentStop.stop_lon);
     const distNext = nextStop ? distance(userLat, userLon, nextStop.stop_lat, nextStop.stop_lon) : Infinity;
 
-    // Activeer currentStopScreen als binnen 100m en afstand afneemt
-    if (distCurrent < 100 && (lastDistanceToCurrent === null || distCurrent < lastDistanceToCurrent)) {
-        currentStopScreen = true;
+    // Check of we <50m van de huidige halte zijn
+    if (distCurrent <= 50) {
+        renderCurrentStop(currentIndex);
+    } else {
+        // Normale layout
+        renderStops(currentIndex);
     }
 
-    // Als de afstand tot huidige stop >30m en weer begint te stijgen, en afstand tot volgende afneemt -> opschuiven
-    if (currentStopScreen && distCurrent > 30 && lastDistanceToCurrent !== null && distCurrent > lastDistanceToCurrent && distNext < previousDistanceToNext) {
+    // Bestaande opschuif-logica (als je wilt behouden)
+    if (distCurrent > 30 && lastDistanceToCurrent !== null && distCurrent > lastDistanceToCurrent && distNext < previousDistanceToNext) {
         lastClosestIndex = nextIndex;
-        currentStopScreen = false; // reset voor volgende halte
         renderStops(lastClosestIndex);
         console.log("➡️ Opschuiven naar:", haltes[lastClosestIndex].stop_name);
     }
@@ -226,6 +259,7 @@ function updateHaltes(userLat, userLon) {
     lastDistanceToCurrent = distCurrent;
     previousDistanceToNext = distNext;
 }
+
 
 function sanityCheck(userLat, userLon) {
     if (!haltes || haltes.length === 0) return;
@@ -251,10 +285,42 @@ setInterval(() => {
     );
 }, sanityInterval);
 
+// Wacht 10 seconden na het laden van de pagina om de dichtstbijzijnde halte te bepalen
+setTimeout(() => {
+    console.log("⏱️ Bepaal dichtstbijzijnde halte...");
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const userLat = pos.coords.latitude;
+                const userLon = pos.coords.longitude;
+
+                let closestIndex = 0;
+                let minDistance = Infinity;
+
+                haltes.forEach((stop, i) => {
+                    const d = distance(userLat, userLon, stop.stop_lat, stop.stop_lon);
+                    if (d < minDistance) {
+                        minDistance = d;
+                        closestIndex = i;
+                    }
+                });
+
+                lastClosestIndex = closestIndex;
+                console.log("🎯 Start bij halte:", haltes[closestIndex].stop_name, "(", minDistance.toFixed(1), "m )");
+                renderStops(lastClosestIndex);
+            },
+            err => console.warn("Locatie niet beschikbaar:", err.message)
+        );
+    } else {
+        console.warn("Geolocatie niet ondersteund");
+    }
+}, 3000); // 10 seconden wachten
+
 
 // eerste aanroep + interval
 getLocationAndUpdate();
-setInterval(getLocationAndUpdate, 3000);
+setInterval(getLocationAndUpdate, 1000);
 </script>
 </body>
 </html>
