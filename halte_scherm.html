@@ -3,7 +3,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>Lijn R31 — Brussel Noord</title>
+<title>Lijn 28 - Mechelen Station</title>
 <style>
 
 @font-face {
@@ -58,9 +58,9 @@ body {
 }
 
 .line-box {
-    background-color: #15882E;
-    color: #FFFFFF;
-    -webkit-text-stroke: 2px #000;
+    background-color: #70A3BD;
+    color: #000000;
+    -webkit-text-stroke: 2px #fff;
     padding: 5px 20px;
     border-radius: 25px;
     font-size: 4.75em;
@@ -112,8 +112,8 @@ body {
 <body>
 <div class="header">
     <div class="line-info">
-        <span class="line-box">R31</span>
-        <span class="destination">Brussel Noord</span>
+        <span class="line-box">28</span>
+        <span class="destination">Mechelen Station</span>
     </div>
     <div class="clock" id="clock"></div>
 </div>
@@ -123,7 +123,7 @@ body {
 <div class="footer" id="next-stop">Volgende halte: —</div>
 
 <script>
-const haltes = [{"stop_name": "Grimbergen Verbrande Brug West", "stop_lat": 50.947994, "stop_lon": 4.41264}, {"stop_name": "Grimbergen Heienbeekstraat", "stop_lat": 50.947639, "stop_lon": 4.410659}, {"stop_name": "Grimbergen Nachtegaal", "stop_lat": 50.945926, "stop_lon": 4.405996}, {"stop_name": "Grimbergen Lint", "stop_lat": 50.945046, "stop_lon": 4.40086}, {"stop_name": "Grimbergen Maelbeek", "stop_lat": 50.943956, "stop_lon": 4.397984}, {"stop_name": "Grimbergen Humbeeksesteenweg", "stop_lat": 50.942861, "stop_lon": 4.396032}, {"stop_name": "Grimbergen Hoeveland", "stop_lat": 50.941045, "stop_lon": 4.391134}, {"stop_name": "Grimbergen Tommenmolen", "stop_lat": 50.939293, "stop_lon": 4.385427}, {"stop_name": "Grimbergen Veldkant", "stop_lat": 50.936478, "stop_lon": 4.383838}, {"stop_name": "Grimbergen Kerkhof", "stop_lat": 50.934636, "stop_lon": 4.380194}, {"stop_name": "Grimbergen Rusthuis", "stop_lat": 50.934352, "stop_lon": 4.376185}, {"stop_name": "Grimbergen Abdij", "stop_lat": 50.93436, "stop_lon": 4.372109}, {"stop_name": "Grimbergen Stelplaats perron 1", "stop_lat": 50.935726, "stop_lon": 4.363441}, {"stop_name": "Grimbergen Dorp", "stop_lat": 50.932179, "stop_lon": 4.364641}, {"stop_name": "Grimbergen Triohofstraat", "stop_lat": 50.929199, "stop_lon": 4.366321}, {"stop_name": "Grimbergen Dr. Hemerijckxlaan", "stop_lat": 50.926764, "stop_lon": 4.365849}, {"stop_name": "Grimbergen Spaanse Linde", "stop_lat": 50.921693, "stop_lon": 4.364837}, {"stop_name": "Grimbergen Hellebeekberg", "stop_lat": 50.915523, "stop_lon": 4.368192}, {"stop_name": "Vilvoorde Het Voor", "stop_lat": 50.912594, "stop_lon": 4.370981}, {"stop_name": "Strombeek-Bever Tulpenlaan", "stop_lat": 50.909412, "stop_lon": 4.364421}, {"stop_name": "Strombeek-Bever Pierebad", "stop_lat": 50.911708, "stop_lon": 4.360353}, {"stop_name": "Strombeek-Bever Kerk", "stop_lat": 50.909679, "stop_lon": 4.356463}, {"stop_name": "Strombeek-Bever Rijkendalstraat", "stop_lat": 50.906176, "stop_lon": 4.356657}, {"stop_name": "Strombeek-Bever Bloemendallaan", "stop_lat": 50.904094, "stop_lon": 4.357012}, {"stop_name": "Strombeek-Bever Mutsaard", "stop_lat": 50.902223, "stop_lon": 4.360528}, {"stop_name": "Brussel Wannecouter", "stop_lat": 50.898866, "stop_lon": 4.359638}, {"stop_name": "Brussel De Wand", "stop_lat": 50.895321, "stop_lon": 4.357773}, {"stop_name": "Brussel Koninklijke Serres", "stop_lat": 50.888729, "stop_lon": 4.356167}, {"stop_name": "Brussel Schola Europea", "stop_lat": 50.88549, "stop_lon": 4.353197}, {"stop_name": "Brussel Kunstenaars", "stop_lat": 50.881691, "stop_lon": 4.354256}, {"stop_name": "Brussel Karel Bogaerd", "stop_lat": 50.881229, "stop_lon": 4.34842}, {"stop_name": "Brussel Station Bockstael", "stop_lat": 50.879885, "stop_lon": 4.347623}, {"stop_name": "Brussel Bockstael", "stop_lat": 50.876003, "stop_lon": 4.348201}, {"stop_name": "Brussel Nekkersdal", "stop_lat": 50.873979, "stop_lon": 4.346433}, {"stop_name": "Brussel Poesjkin", "stop_lat": 50.870937, "stop_lon": 4.34363}, {"stop_name": "Brussel Andr\u00e9e De Jongh", "stop_lat": 50.870797, "stop_lon": 4.349092}, {"stop_name": "Brussel Suzan Daniel", "stop_lat": 50.862985, "stop_lon": 4.348659}, {"stop_name": "Brussel WTC", "stop_lat": 50.861305, "stop_lon": 4.355211}, {"stop_name": "Brussel Noord afstaphalte", "stop_lat": 50.859321, "stop_lon": 4.359647}];
+const haltes = [{"stop_name": "Vilvoorde Ziekenhuis", "stop_lat": 50.929282, "stop_lon": 4.41778}, {"stop_name": "Vilvoorde Stadhuis", "stop_lat": 50.928208, "stop_lon": 4.422372}, {"stop_name": "Vilvoorde Heldenplein", "stop_lat": 50.926407, "stop_lon": 4.424984}, {"stop_name": "Vilvoorde Station perron 5", "stop_lat": 50.924471, "stop_lon": 4.432074}, {"stop_name": "Vilvoorde Spoorwegbrug", "stop_lat": 50.927466, "stop_lon": 4.434473}, {"stop_name": "Vilvoorde Hoveniersstraat", "stop_lat": 50.927163, "stop_lon": 4.439449}, {"stop_name": "Vilvoorde Steevoortstraat", "stop_lat": 50.926443, "stop_lon": 4.44548}, {"stop_name": "Vilvoorde Aarschotsestraat", "stop_lat": 50.924497, "stop_lon": 4.449229}, {"stop_name": "Peutie Kerkstraat", "stop_lat": 50.926106, "stop_lon": 4.455881}, {"stop_name": "Peutie Melsbroekstraat", "stop_lat": 50.926739, "stop_lon": 4.464925}, {"stop_name": "Peutie Militair Complex", "stop_lat": 50.929825, "stop_lon": 4.467917}, {"stop_name": "Perk Huinhovenstraat", "stop_lat": 50.933067, "stop_lon": 4.47686}, {"stop_name": "Perk Krekelenhoekstraat", "stop_lat": 50.934772, "stop_lon": 4.485654}, {"stop_name": "Perk Kerk", "stop_lat": 50.933506, "stop_lon": 4.49669}, {"stop_name": "Perk Oude Pastorie", "stop_lat": 50.935761, "stop_lon": 4.495706}, {"stop_name": "Perk Molenstraat", "stop_lat": 50.943204, "stop_lon": 4.493884}, {"stop_name": "Perk Boekt", "stop_lat": 50.953642, "stop_lon": 4.496626}, {"stop_name": "Elewijt Kerk", "stop_lat": 50.960255, "stop_lon": 4.497119}, {"stop_name": "Elewijt Vierhoek", "stop_lat": 50.962856, "stop_lon": 4.495971}, {"stop_name": "Elewijt Diependaalstraat", "stop_lat": 50.967004, "stop_lon": 4.496409}, {"stop_name": "Elewijt Driesstraat", "stop_lat": 50.972265, "stop_lon": 4.498827}, {"stop_name": "Elewijt Lange Weidestraat", "stop_lat": 50.976582, "stop_lon": 4.504362}, {"stop_name": "Elewijt Hofstade Strand", "stop_lat": 50.979963, "stop_lon": 4.505732}, {"stop_name": "Hofstade Station", "stop_lat": 50.987465, "stop_lon": 4.497525}, {"stop_name": "Hofstade Kerk", "stop_lat": 50.991066, "stop_lon": 4.493082}, {"stop_name": "Hofstade t Steppeke", "stop_lat": 50.994272, "stop_lon": 4.490832}, {"stop_name": "Mechelen Geerdegemstraat", "stop_lat": 50.997627, "stop_lon": 4.487513}, {"stop_name": "Mechelen Lindestraat", "stop_lat": 50.999987, "stop_lon": 4.480051}, {"stop_name": "Mechelen Jubellaan", "stop_lat": 51.003481, "stop_lon": 4.477333}, {"stop_name": "Mechelen Wilgenstraat", "stop_lat": 51.007564, "stop_lon": 4.477708}, {"stop_name": "Mechelen Stenenmolenstraat", "stop_lat": 51.009159, "stop_lon": 4.477857}, {"stop_name": "Mechelen Europalaan", "stop_lat": 51.012507, "stop_lon": 4.475806}, {"stop_name": "Mechelen Station perron 1", "stop_lat": 51.017748, "stop_lon": 4.48268}];
 // index van de halte die momenteel als "huidige" wordt beschouwd in de lijst
 let lastClosestIndex = 0;
 // onthoud vorige afstand naar "next" stop om te vergelijken of die afneemt
@@ -132,8 +132,7 @@ let prevNextDist = null;
 let prevCurrentDist = null;
 let lastDistanceToCurrent = null;
 let currentStopScreenActivate = false;
-let sanityInterval = 600000; // 30 sec
-
+let sanityInterval = 600000;
 
 // Update klok
 function updateClock() {
@@ -300,8 +299,7 @@ setInterval(() => {
 
 // eerste aanroep + interval
 getLocationAndUpdate();
-// Hier gebruik je 7500ms zoals in je code (pas aan naar 15000 indien gewenst)
-setInterval(getLocationAndUpdate, 7500);
+setInterval(getLocationAndUpdate, 5000);
 </script>
 </body>
 </html>
