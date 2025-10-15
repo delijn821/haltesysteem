@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Lijn R31 — Brussel Noord</title>
+<style>
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Bold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+
+body {
+    font-family: 'FlandersArtSans', Arial, sans-serif;
+    background-color: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    padding-top: 3%;
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.line-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.line-box {
+    background-color: #15882E;
+    color: #FFFFFF;
+    -webkit-text-stroke: 2px #000;
+    padding: 5px 20px;
+    border-radius: 25px;
+    font-size: 4.75em;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.destination {
+    font-size: 3.75em;
+    font-weight: 500;
+}
+
+.clock {
+    font-size: 3.5em;
+    font-weight: 400;
+}
+
+.stops {
+    display: flex;
+    padding-top: 3%;
+    flex-grow: 1;
+    overflow: hidden;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 2.25em;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+}
+
+.stop {
+    background-color: #333;
+    border-radius: 15px;
+    padding: 15px;
+}
+
+.footer {
+    font-size: 3em;
+    font-weight: 500;
+    margin-top: auto;
+    margin-bottom: 3%;
+    width: 100%;
+    text-align: center;
+    padding: 2%;
+    border-top: 2px solid #444;
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="line-info">
+        <span class="line-box">R31</span>
+        <span class="destination">Brussel Noord</span>
+    </div>
+    <div class="clock" id="clock"></div>
+</div>
+
+<div class="stops" id="stops-container"></div>
+
+<div class="footer" id="next-stop">Volgende halte: —</div>
+
+<script>
+const haltes = [{"stop_name": "Grimbergen Verbrande Brug West", "stop_lat": 50.947994, "stop_lon": 4.41264}, {"stop_name": "Grimbergen Heienbeekstraat", "stop_lat": 50.947639, "stop_lon": 4.410659}, {"stop_name": "Grimbergen Nachtegaal", "stop_lat": 50.945926, "stop_lon": 4.405996}, {"stop_name": "Grimbergen Lint", "stop_lat": 50.945046, "stop_lon": 4.40086}, {"stop_name": "Grimbergen Maelbeek", "stop_lat": 50.943956, "stop_lon": 4.397984}, {"stop_name": "Grimbergen Humbeeksesteenweg", "stop_lat": 50.942861, "stop_lon": 4.396032}, {"stop_name": "Grimbergen Hoeveland", "stop_lat": 50.941045, "stop_lon": 4.391134}, {"stop_name": "Grimbergen Tommenmolen", "stop_lat": 50.939293, "stop_lon": 4.385427}, {"stop_name": "Grimbergen Veldkant", "stop_lat": 50.936478, "stop_lon": 4.383838}, {"stop_name": "Grimbergen Kerkhof", "stop_lat": 50.934636, "stop_lon": 4.380194}, {"stop_name": "Grimbergen Rusthuis", "stop_lat": 50.934352, "stop_lon": 4.376185}, {"stop_name": "Grimbergen Abdij", "stop_lat": 50.93436, "stop_lon": 4.372109}, {"stop_name": "Grimbergen Stelplaats perron 1", "stop_lat": 50.935726, "stop_lon": 4.363441}, {"stop_name": "Grimbergen Dorp", "stop_lat": 50.932179, "stop_lon": 4.364641}, {"stop_name": "Grimbergen Triohofstraat", "stop_lat": 50.929199, "stop_lon": 4.366321}, {"stop_name": "Grimbergen Dr. Hemerijckxlaan", "stop_lat": 50.926764, "stop_lon": 4.365849}, {"stop_name": "Grimbergen Spaanse Linde", "stop_lat": 50.921693, "stop_lon": 4.364837}, {"stop_name": "Grimbergen Hellebeekberg", "stop_lat": 50.915523, "stop_lon": 4.368192}, {"stop_name": "Vilvoorde Het Voor", "stop_lat": 50.912594, "stop_lon": 4.370981}, {"stop_name": "Strombeek-Bever Tulpenlaan", "stop_lat": 50.909412, "stop_lon": 4.364421}, {"stop_name": "Strombeek-Bever Pierebad", "stop_lat": 50.911708, "stop_lon": 4.360353}, {"stop_name": "Strombeek-Bever Kerk", "stop_lat": 50.909679, "stop_lon": 4.356463}, {"stop_name": "Strombeek-Bever Rijkendalstraat", "stop_lat": 50.906176, "stop_lon": 4.356657}, {"stop_name": "Strombeek-Bever Bloemendallaan", "stop_lat": 50.904094, "stop_lon": 4.357012}, {"stop_name": "Strombeek-Bever Mutsaard", "stop_lat": 50.902223, "stop_lon": 4.360528}, {"stop_name": "Brussel Wannecouter", "stop_lat": 50.898866, "stop_lon": 4.359638}, {"stop_name": "Brussel De Wand", "stop_lat": 50.895321, "stop_lon": 4.357773}, {"stop_name": "Brussel Koninklijke Serres", "stop_lat": 50.888729, "stop_lon": 4.356167}, {"stop_name": "Brussel Schola Europea", "stop_lat": 50.88549, "stop_lon": 4.353197}, {"stop_name": "Brussel Kunstenaars", "stop_lat": 50.881691, "stop_lon": 4.354256}, {"stop_name": "Brussel Karel Bogaerd", "stop_lat": 50.881229, "stop_lon": 4.34842}, {"stop_name": "Brussel Station Bockstael", "stop_lat": 50.879885, "stop_lon": 4.347623}, {"stop_name": "Brussel Bockstael", "stop_lat": 50.876003, "stop_lon": 4.348201}, {"stop_name": "Brussel Nekkersdal", "stop_lat": 50.873979, "stop_lon": 4.346433}, {"stop_name": "Brussel Poesjkin", "stop_lat": 50.870937, "stop_lon": 4.34363}, {"stop_name": "Brussel Andr\u00e9e De Jongh", "stop_lat": 50.870797, "stop_lon": 4.349092}, {"stop_name": "Brussel Suzan Daniel", "stop_lat": 50.862985, "stop_lon": 4.348659}, {"stop_name": "Brussel WTC", "stop_lat": 50.861305, "stop_lon": 4.355211}, {"stop_name": "Brussel Noord afstaphalte", "stop_lat": 50.859321, "stop_lon": 4.359647}];
+// index van de halte die momenteel als "huidige" wordt beschouwd in de lijst
+let lastClosestIndex = 0;
+// onthoud vorige afstand naar "next" stop om te vergelijken of die afneemt
+let prevNextDist = null;
+// onthoud vorige afstand naar "current" (optioneel, kan gebruikt voor logging/extra checks)
+let prevCurrentDist = null;
+
+// Update klok
+function updateClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = hours + ':' + minutes;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Bereken afstand tussen 2 GPS-coördinaten (Haversine) -> meter
+function distance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Render functie die de zichtbare haltes in DOM plaatst
+function renderStops(startIndex) {
+    const visible = haltes.slice(startIndex, startIndex + 5);
+    const container = document.getElementById('stops-container');
+    container.innerHTML = '';
+    visible.forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'stop';
+        div.textContent = h.stop_name;
+        container.appendChild(div);
+    });
+    const nextStop = visible.length > 1 ? visible[1].stop_name : 'Eindhalte bereikt';
+    document.getElementById('next-stop').textContent = "Volgende halte: " + nextStop;
+}
+
+// initial render
+renderStops(lastClosestIndex);
+
+// De hoofdregel: schuif 1 halte op als gebruiker >50m van 'current' is en 'next' dichterbij KOMT
+function updateHaltes(userLat, userLon) {
+    if (!haltes || haltes.length === 0) return;
+
+    // index van huidige en volgende halte binnen de volledige lijst
+    const currentIndex = lastClosestIndex;
+    const nextIndex = Math.min(currentIndex + 1, haltes.length - 1);
+
+    const currentStop = haltes[currentIndex];
+    const nextStop = haltes[nextIndex];
+
+    // compute afstanden
+    const distCurrent = distance(userLat, userLon, parseFloat(currentStop.stop_lat), parseFloat(currentStop.stop_lon));
+    const distNext = nextStop ? distance(userLat, userLon, parseFloat(nextStop.stop_lat), parseFloat(nextStop.stop_lon)) : Infinity;
+
+    // Debug (optioneel)
+    // console.log("distCurrent:", distCurrent, "distNext:", distNext, "prevNextDist:", prevNextDist);
+
+    // Als prevNextDist nog niet gezet is, initialiseer het (we willen bij eerste meting niet meteen schuiven)
+    if (prevNextDist === null) {
+        prevNextDist = distNext;
+        prevCurrentDist = distCurrent;
+        // render en return
+        renderStops(lastClosestIndex);
+        return;
+    }
+
+    // Voorwaarde om op te schuiven:
+    // 1) gebruiker is meer dan 50m verwijderd van huidige halte (distCurrent > 50)
+    // 2) de afstand naar de volgende halte is **gedaald** t.o.v. vorige meting (distNext < prevNextDist)
+    // 3) en we hebben nog een volgende halte (nextIndex > currentIndex)
+    if (distCurrent > 50 && distNext < prevNextDist && nextIndex > currentIndex) {
+        lastClosestIndex = nextIndex;
+        // na opschuiven renderen we de nieuwe zichtbare haltes
+        renderStops(lastClosestIndex);
+    } else {
+        // Geen opschuiving: toch de renders up-to-date houden (kan nodig zijn voor first render)
+        renderStops(lastClosestIndex);
+    }
+
+    // Update prev waarden voor volgende check
+    prevNextDist = distNext;
+    prevCurrentDist = distCurrent;
+}
+
+// Vraag GPS-locatie van apparaat en update
+function getLocationAndUpdate() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                updateHaltes(lat, lon);
+            },
+            err => {
+                console.warn("GPS-fout: " + err.message);
+                // fallback op eerste halte
+                updateHaltes(parseFloat(haltes[0].stop_lat), parseFloat(haltes[0].stop_lon));
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 5000,
+                timeout: 10000
+            }
+        );
+    } else {
+        console.warn("Geolocatie niet ondersteund");
+        updateHaltes(parseFloat(haltes[0].stop_lat), parseFloat(haltes[0].stop_lon));
+    }
+}
+
+// eerste aanroep + interval
+getLocationAndUpdate();
+// Hier gebruik je 7500ms zoals in je code (pas aan naar 15000 indien gewenst)
+setInterval(getLocationAndUpdate, 7500);
+</script>
+</body>
+</html>
