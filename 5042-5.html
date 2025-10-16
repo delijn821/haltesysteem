@@ -145,7 +145,7 @@ let currentStopScreen = false;
 let sanityInterval = 300000;
 let previousDistanceToNext = null; 
 let updateCounter = 0;  // telt hoeveel keer updateHaltes is aangeroepen
-const sanityEvery = 5;  // voer sanityCheck uit elke 5 haltes
+// const sanityEvery = 60;  // voer sanityCheck uit elke 5 haltes
 
 // Update klok
 function updateClock() {
@@ -277,11 +277,16 @@ function sanityCheck(userLat, userLon) {
     const distCurrent = distance(userLat, userLon, haltes[lastClosestIndex].stop_lat, haltes[lastClosestIndex].stop_lon);
     const distNext = distance(userLat, userLon, haltes[nextIndex].stop_lat, haltes[nextIndex].stop_lon);
 
-    // Als de gebruiker duidelijk dichter bij een andere halte is, corrigeer lastClosestIndex
-    if (distPrev < distCurrent && distPrev < distNext) lastClosestIndex = prevIndex;
-    else if (distNext < distCurrent && distNext < distPrev) lastClosestIndex = nextIndex;
+    let proposedIndex = lastClosestIndex;
 
-    renderStops(lastClosestIndex);
+    // Als de gebruiker duidelijk dichter bij een andere halte is, corrigeer lastClosestIndex
+    if (distPrev + 10 < distCurrent) proposedIndex = prevIndex;
+    else if (distNext + 10 < distCurrent) proposedIndex = nextIndex;
+    
+    if (proposedIndex !== lastClosestIndex) {
+        lastClosestIndex = proposedIndex;
+        console.log("🔄 Sanity-correctie:", haltes[lastClosestIndex].stop_name);
+    }
 }
 
 // Wacht na het laden van de pagina om de dichtstbijzijnde halte te bepalen
