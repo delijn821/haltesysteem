@@ -27,7 +27,6 @@
     font-style: normal;
 }
 
-
 body {
     font-family: 'FlandersArtSans', Arial, sans-serif;
     background-color: #111;
@@ -145,6 +144,8 @@ let lastDistanceToCurrent = null;
 let currentStopScreen = false;
 let sanityInterval = 300000;
 let previousDistanceToNext = null; 
+let updateCounter = 0;  // telt hoeveel keer updateHaltes is aangeroepen
+// const sanityEvery = 60;  // voer sanityCheck uit elke 5 haltes
 
 // Update klok
 function updateClock() {
@@ -228,7 +229,6 @@ function renderCurrentStop(currentIndex) {
         "Volgende halte: " + (nextStop ? nextStop.stop_name : "Eindhalte bereikt");
 }
 
-
 function updateHaltes(userLat, userLon) {
     if (!haltes || haltes.length === 0) return;
 
@@ -241,15 +241,15 @@ function updateHaltes(userLat, userLon) {
     const distCurrent = distance(userLat, userLon, currentStop.stop_lat, currentStop.stop_lon);
     const distNext = nextStop ? distance(userLat, userLon, nextStop.stop_lat, nextStop.stop_lon) : Infinity;
 
-    // Check of we <50m van de huidige halte zijn
-    if (distCurrent <= 50) {
+    // Check of in de buurt van de huidige halte zijn
+    if (distCurrent <= 60) {
         renderCurrentStop(currentIndex);
     } else {
         // Normale layout
         renderStops(currentIndex);
     }
 
-    // Bestaande opschuif-logica (als je wilt behouden)
+    // Opschuif-logica
     if (distCurrent > 30 && lastDistanceToCurrent !== null && distCurrent > lastDistanceToCurrent && distNext < previousDistanceToNext) {
         lastClosestIndex = nextIndex;
         renderStops(lastClosestIndex);
@@ -258,8 +258,13 @@ function updateHaltes(userLat, userLon) {
 
     lastDistanceToCurrent = distCurrent;
     previousDistanceToNext = distNext;
-}
 
+    updateCounter++;
+
+    if (updateCounter % sanityEvery === 0) {
+    sanityCheck(userLat, userLon)
+    }
+}
 
 function sanityCheck(userLat, userLon) {
     if (!haltes || haltes.length === 0) return;
@@ -272,20 +277,19 @@ function sanityCheck(userLat, userLon) {
     const distCurrent = distance(userLat, userLon, haltes[lastClosestIndex].stop_lat, haltes[lastClosestIndex].stop_lon);
     const distNext = distance(userLat, userLon, haltes[nextIndex].stop_lat, haltes[nextIndex].stop_lon);
 
+    let proposedIndex = lastClosestIndex;
+
     // Als de gebruiker duidelijk dichter bij een andere halte is, corrigeer lastClosestIndex
-    if (distPrev < distCurrent && distPrev < distNext) lastClosestIndex = prevIndex;
-    else if (distNext < distCurrent && distNext < distPrev) lastClosestIndex = nextIndex;
-
-    renderStops(lastClosestIndex);
+    if (distPrev + 10 < distCurrent) proposedIndex = prevIndex;
+    else if (distNext + 10 < distCurrent) proposedIndex = nextIndex;
+    
+    if (proposedIndex !== lastClosestIndex) {
+        lastClosestIndex = proposedIndex;
+        console.log("🔄 Sanity-correctie:", haltes[lastClosestIndex].stop_name);
+    }
 }
-setInterval(() => {
-    navigator.geolocation.getCurrentPosition(
-        pos => sanityCheck(pos.coords.latitude, pos.coords.longitude),
-        err => console.warn("Sanity GPS-fout:", err.message)
-    );
-}, sanityInterval);
 
-// Wacht 10 seconden na het laden van de pagina om de dichtstbijzijnde halte te bepalen
+// Wacht na het laden van de pagina om de dichtstbijzijnde halte te bepalen
 setTimeout(() => {
     console.log("⏱️ Bepaal dichtstbijzijnde halte...");
 
@@ -315,13 +319,11 @@ setTimeout(() => {
     } else {
         console.warn("Geolocatie niet ondersteund");
     }
-}, 10000); // 10 seconden wachten
-
+}, 2000); // wachten
 
 // eerste aanroep + interval
 getLocationAndUpdate();
-setInterval(getLocationAndUpdate, 1000);
+setInterval(getLocationAndUpdate, 1500);
 </script>
 </body>
 </html>
-
