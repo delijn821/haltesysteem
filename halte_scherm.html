@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Lijn 21 - Zaventem Brussels Airport</title>
+<style>
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Bold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'FlandersArtSans';
+    src: url('fonts/FlandersArtSans-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+    font-family: 'FlandersArtSans', Arial, sans-serif;
+    background-color: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    padding-top: 2.75%;
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.line-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.line-box {
+    background-color: #C8D300;
+    color: #000000;
+    -webkit-text-stroke: 2px #fff;
+    padding: 5px 20px;
+    border-radius: 25px;
+    font-size: 4.75em;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+.destination {
+    font-size: 3.75em;
+    font-weight: 500;
+}
+
+.clock {
+    font-size: 3.5em;
+    font-weight: 400;
+}
+
+.stops {
+    display: flex;
+    padding-top: 3%;
+    flex-grow: 1;
+    overflow: hidden;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 2.25em;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+}
+
+.stop {
+    background-color: #333;
+    border-radius: 15px;
+    padding: 15px;
+}
+
+.footer {
+    font-size: 3em;
+    font-weight: 500;
+    margin-top: auto;
+    margin-bottom: 3.25%;
+    width: 100%;
+    text-align: center;
+    padding: 2%;
+    border-top: 2px solid #444;
+}
+
+.current-stop {
+    font-size: 2em;
+    font-weight: 500;
+    margin-top: 3.25%;
+    margin-bottom: 3.25%;
+    width: 100%;
+    text-align: center;
+    padding: 2%;
+}
+
+.stops-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    width: 100%;
+}
+
+.timeline {
+    position: absolute;
+    left: 36px;
+    width: 6px;
+    background-color: #fff;
+    border-radius: 2px;
+    z-index: 0;
+    top: 45px;
+    bottom: 30px;
+}
+
+.stop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    border-radius: 15px;
+    padding: 15px 15px 15px 60px;
+    z-index: 1;
+}
+
+.stop::before {
+    content: "";
+    position: absolute;
+    left: 25px;
+    width: 20px;
+    height: 20px;
+    background-color: #111;
+    border: 5px solid #fff;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    top: 50%;
+}
+
+.stop.first::before {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translateY(-50%) scale(1.0); }
+    50% { transform: translateY(-50%) scale(1.3); }
+}
+
+.stop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    border-radius: 15px;
+    padding: 15px 25px 15px 60px;
+}
+
+.stop-name {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.stop-time {
+    font-size: 0.8em;
+    color: #ccc;
+    text-align: right;
+    min-width: 80px;
+}
+
+
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="line-info">
+        <span class="line-box">21</span>
+        <span class="destination">Zaventem Brussels Airport</span>
+    </div>
+    <div class="clock" id="clock"></div>
+</div>
+
+<div class="stops-container">
+    <div class="timeline"></div>
+    <div class="stops" id="stops-container"></div>
+</div>
+
+<div class="footer" id="next-stop">Volgende halte: —</div>
+
+<script>
+const haltes = [{"stop_name": "Merchtem Mieregem", "departure_time": "16:30:00", "stop_lat": 50.956119, "stop_lon": 4.231682}, {"stop_name": "Merchtem Varkensmarkt", "departure_time": "16:31:00", "stop_lat": 50.958603, "stop_lon": 4.232578}, {"stop_name": "Merchtem Bleukenweg", "departure_time": "16:32:00", "stop_lat": 50.960495, "stop_lon": 4.237686}, {"stop_name": "Merchtem Drypikkel", "departure_time": "16:33:00", "stop_lat": 50.958967, "stop_lon": 4.242935}, {"stop_name": "Merchtem Dooren", "departure_time": "16:35:00", "stop_lat": 50.955946, "stop_lon": 4.253214}, {"stop_name": "Merchtem Kleistraat", "departure_time": "16:37:00", "stop_lat": 50.951402, "stop_lon": 4.26862}, {"stop_name": "Wolvertem Meuzegemstraat", "departure_time": "16:40:00", "stop_lat": 50.952064, "stop_lon": 4.293758}, {"stop_name": "Wolvertem Driesstraat", "departure_time": "16:41:00", "stop_lat": 50.952064, "stop_lon": 4.302063}, {"stop_name": "Wolvertem Gemeenteplein", "departure_time": "16:42:00", "stop_lat": 50.950514, "stop_lon": 4.308733}, {"stop_name": "Wolvertem Kerkhof", "departure_time": "16:43:00", "stop_lat": 50.948491, "stop_lon": 4.306588}, {"stop_name": "Wolvertem Oppemse Hoeve", "departure_time": "16:44:00", "stop_lat": 50.94308, "stop_lon": 4.304705}, {"stop_name": "Meise Oppem Kerk", "departure_time": "16:46:00", "stop_lat": 50.93905, "stop_lon": 4.306038}, {"stop_name": "Meise Hasseltbergstraat", "departure_time": "16:48:00", "stop_lat": 50.940886, "stop_lon": 4.314408}, {"stop_name": "Meise Oppem-Hasselt", "departure_time": "16:50:00", "stop_lat": 50.943271, "stop_lon": 4.320542}, {"stop_name": "Meise Van Dievoetlaan", "departure_time": "16:51:00", "stop_lat": 50.940494, "stop_lon": 4.32487}, {"stop_name": "Meise De Donderstraat", "departure_time": "16:52:00", "stop_lat": 50.937588, "stop_lon": 4.327782}, {"stop_name": "Meise Oratorienlaan", "departure_time": "16:53:00", "stop_lat": 50.938379, "stop_lon": 4.333062}, {"stop_name": "Meise Limbos", "departure_time": "16:55:00", "stop_lat": 50.941496, "stop_lon": 4.339295}, {"stop_name": "Meise Dreef", "departure_time": "16:56:00", "stop_lat": 50.940096, "stop_lon": 4.345762}, {"stop_name": "Grimbergen Biesthoek", "departure_time": "16:58:00", "stop_lat": 50.93881, "stop_lon": 4.351714}, {"stop_name": "Grimbergen Waardbeek", "departure_time": "17:00:00", "stop_lat": 50.93746, "stop_lon": 4.357955}, {"stop_name": "Grimbergen Stelplaats perron 2", "departure_time": "17:02:00", "stop_lat": 50.935886, "stop_lon": 4.363523}, {"stop_name": "Grimbergen Abdij", "departure_time": "17:04:00", "stop_lat": 50.933887, "stop_lon": 4.372791}, {"stop_name": "Grimbergen Klont", "departure_time": "17:06:00", "stop_lat": 50.929335, "stop_lon": 4.382867}, {"stop_name": "Grimbergen Delhaize", "departure_time": "17:08:00", "stop_lat": 50.926583, "stop_lon": 4.391619}, {"stop_name": "Grimbergen Oude Schapenbaan", "departure_time": "17:09:00", "stop_lat": 50.92546, "stop_lon": 4.39779}, {"stop_name": "Vilvoorde Breemput", "departure_time": "17:11:00", "stop_lat": 50.923687, "stop_lon": 4.408353}, {"stop_name": "Vilvoorde Kassei", "departure_time": "17:13:00", "stop_lat": 50.922884, "stop_lon": 4.415632}, {"stop_name": "Vilvoorde Heldenplein", "departure_time": "17:15:00", "stop_lat": 50.926407, "stop_lon": 4.424984}, {"stop_name": "Vilvoorde Station perron 2", "departure_time": "17:17:00", "stop_lat": 50.924277, "stop_lon": 4.432245}, {"stop_name": "Vilvoorde Fabrieksstraat", "departure_time": "17:18:00", "stop_lat": 50.925651, "stop_lon": 4.435442}, {"stop_name": "Vilvoorde Levis", "departure_time": "17:20:00", "stop_lat": 50.923501, "stop_lon": 4.44116}, {"stop_name": "Machelen Heirbaan", "departure_time": "17:21:00", "stop_lat": 50.918004, "stop_lon": 4.448018}, {"stop_name": "Machelen Cargo Discount P1", "departure_time": "17:25:00", "stop_lat": 50.906224, "stop_lon": 4.460645}, {"stop_name": "Machelen Cargo 739", "departure_time": "17:27:00", "stop_lat": 50.907332, "stop_lon": 4.452714}, {"stop_name": "Machelen Cargo Post Zuid", "departure_time": "17:28:00", "stop_lat": 50.903937, "stop_lon": 4.452309}, {"stop_name": "Machelen Cargo West", "departure_time": "17:29:00", "stop_lat": 50.902023, "stop_lon": 4.446165}, {"stop_name": "Machelen Sector 8", "departure_time": "17:31:00", "stop_lat": 50.896377, "stop_lon": 4.450188}, {"stop_name": "Machelen Korenberg", "departure_time": "17:32:00", "stop_lat": 50.896432, "stop_lon": 4.455752}, {"stop_name": "Zaventem B-House", "departure_time": "17:33:00", "stop_lat": 50.894757, "stop_lon": 4.463999}, {"stop_name": "Zaventem Gebouw 9", "departure_time": "17:34:00", "stop_lat": 50.894759, "stop_lon": 4.469905}, {"stop_name": "Zaventem Technics Noord", "departure_time": "17:35:00", "stop_lat": 50.896267, "stop_lon": 4.47536}, {"stop_name": "Zaventem Brussels Airport perron A", "departure_time": "17:37:00", "stop_lat": 50.898047, "stop_lon": 4.482065}];
+// index van de halte die momenteel als "huidige" wordt beschouwd in de lijst
+let lastClosestIndex = 0;
+// onthoud vorige afstand naar "next" stop om te vergelijken of die afneemt
+let prevNextDist = null;
+// onthoud vorige afstand naar "current" (optioneel, kan gebruikt voor logging/extra checks)
+let prevCurrentDist = null;
+let lastDistanceToCurrent = null;
+let currentStopScreen = false;
+let sanityInterval = 300000;
+let previousDistanceToNext = null; 
+let updateCounter = 0;  // telt hoeveel keer updateHaltes is aangeroepen
+// const sanityEvery = 60;  // voer sanityCheck uit elke 5 haltes
+
+// Update klok
+function updateClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = hours + ':' + minutes;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Bereken afstand tussen 2 GPS-coördinaten (Haversine) -> meter
+function distance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Render functie die de zichtbare haltes in DOM plaatst
+function renderStops(startIndex) {
+    const visible = haltes.slice(startIndex, startIndex + 5);
+    const container = document.getElementById('stops-container');
+    // Zorg dat de verticale lijn opnieuw zichtbaar is bij normale weergave
+    document.querySelector('.timeline').style.display = 'block';
+    container.innerHTML = '';
+    visible.forEach((h, i) => {
+        const div = document.createElement('div');
+        div.className = 'stop';
+        if (i === 0) div.classList.add('first'); // eerste halte krijgt pulserende bol
+        div.innerHTML = `
+            <span class="stop-name">${h.stop_name}</span>
+            <span class="stop-time">${h.departure_time ? h.departure_time.slice(0,5) : ""}</span>
+        `;
+        container.appendChild(div);
+    });
+
+    const nextStop = visible.length > 1 ? visible[0].stop_name : 'Eindhalte bereikt';
+    document.getElementById('next-stop').textContent = "Volgende halte: " + nextStop;
+}
+
+// initial render
+renderStops(lastClosestIndex);
+
+// Vraag GPS-locatie van apparaat en update
+function getLocationAndUpdate() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                updateHaltes(lat, lon);
+            },
+            err => {
+                console.warn("GPS-fout: " + err.message);
+                // fallback op eerste halte
+                updateHaltes(parseFloat(haltes[0].stop_lat), parseFloat(haltes[0].stop_lon));
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 5000,
+                timeout: 10000
+            }
+        );
+    } else {
+        console.warn("Geolocatie niet ondersteund");
+        updateHaltes(parseFloat(haltes[0].stop_lat), parseFloat(haltes[0].stop_lon));
+    }
+}
+
+function renderCurrentStop(currentIndex) {
+    const container = document.getElementById('stops-container');
+    // Toon de verticale lijn terug bij normale weergave
+    document.querySelector('.timeline').style.display = 'none';
+    const currentStop = haltes[currentIndex];
+    const nextIndex = Math.min(currentIndex + 1, haltes.length - 1);
+    const nextStop = haltes[nextIndex];
+
+    // Standaard stops verbergen
+    container.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'current-stop';
+    div.innerHTML = "Huidige halte:<br>" + currentStop.stop_name;
+    container.appendChild(div);
+
+    // Footer aanpassen
+    document.getElementById('next-stop').textContent =
+        "Volgende halte: " + (nextStop ? nextStop.stop_name : "Eindhalte bereikt");
+}
+
+function updateHaltes(userLat, userLon) {
+    if (!haltes || haltes.length === 0) return;
+    // === Sanitycheck: spring naar dichtstbijzijnde halte binnen 30 m ===
+    let nearestIndex = null;
+    let minDistance = Infinity;
+
+    haltes.forEach((stop, i) => {
+        const d = distance(userLat, userLon, stop.stop_lat, stop.stop_lon);
+        if (d < minDistance) {
+            minDistance = d;
+            nearestIndex = i;
+        }
+});
+
+// als gebruiker binnen 30 m van eender welke halte is → spring daarheen
+if (minDistance <= 30 && nearestIndex !== lastClosestIndex) {
+    lastClosestIndex = nearestIndex;
+    renderStops(lastClosestIndex);
+    console.log("🎯 Gesprongen naar halte binnen 30 m:", haltes[lastClosestIndex].stop_name);
+    return; // stop verdere verwerking
+}
+    const currentIndex = lastClosestIndex;
+    const nextIndex = Math.min(currentIndex + 1, haltes.length - 1);
+
+    const currentStop = haltes[currentIndex];
+    const nextStop = haltes[nextIndex];
+
+    const distCurrent = distance(userLat, userLon, currentStop.stop_lat, currentStop.stop_lon);
+    const distNext = nextStop ? distance(userLat, userLon, nextStop.stop_lat, nextStop.stop_lon) : Infinity;
+
+    // Check of in de buurt van de huidige halte zijn
+    if (distCurrent <= 60) {
+        renderCurrentStop(currentIndex);
+    } else {
+        // Normale layout
+        renderStops(currentIndex);
+    }
+
+    // Opschuif-logica
+    if (distCurrent > 30 && lastDistanceToCurrent !== null && distCurrent > lastDistanceToCurrent && distNext < previousDistanceToNext) {
+        lastClosestIndex = nextIndex;
+        renderStops(lastClosestIndex);
+        console.log("➡️ Opschuiven naar:", haltes[lastClosestIndex].stop_name);
+    }
+
+    lastDistanceToCurrent = distCurrent;
+    previousDistanceToNext = distNext;
+
+    updateCounter++;
+
+    if (updateCounter % sanityEvery === 0) {
+    sanityCheck(userLat, userLon)
+    }
+}
+
+function sanityCheck(userLat, userLon) {
+    if (!haltes || haltes.length === 0) return;
+
+    // Controleer de afstand tot vorige, huidige en volgende halte
+    const prevIndex = Math.max(0, lastClosestIndex - 1);
+    const nextIndex = Math.min(lastClosestIndex + 1, haltes.length - 1);
+
+    const distPrev = distance(userLat, userLon, haltes[prevIndex].stop_lat, haltes[prevIndex].stop_lon);
+    const distCurrent = distance(userLat, userLon, haltes[lastClosestIndex].stop_lat, haltes[lastClosestIndex].stop_lon);
+    const distNext = distance(userLat, userLon, haltes[nextIndex].stop_lat, haltes[nextIndex].stop_lon);
+
+    let proposedIndex = lastClosestIndex;
+
+    // Als de gebruiker duidelijk dichter bij een andere halte is, corrigeer lastClosestIndex
+    if (distPrev + 10 < distCurrent) proposedIndex = prevIndex;
+    else if (distNext + 10 < distCurrent) proposedIndex = nextIndex;
+    
+    if (proposedIndex !== lastClosestIndex) {
+        lastClosestIndex = proposedIndex;
+        console.log("🔄 Sanity-correctie:", haltes[lastClosestIndex].stop_name);
+    }
+}
+
+// Wacht na het laden van de pagina om de dichtstbijzijnde halte te bepalen
+setTimeout(() => {
+    console.log("⏱️ Bepaal dichtstbijzijnde halte...");
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const userLat = pos.coords.latitude;
+                const userLon = pos.coords.longitude;
+
+                let closestIndex = 0;
+                let minDistance = Infinity;
+
+                haltes.forEach((stop, i) => {
+                    const d = distance(userLat, userLon, stop.stop_lat, stop.stop_lon);
+                    if (d < minDistance) {
+                        minDistance = d;
+                        closestIndex = i;
+                    }
+                });
+
+                lastClosestIndex = closestIndex;
+                console.log("🎯 Start bij halte:", haltes[closestIndex].stop_name, "(", minDistance.toFixed(1), "m )");
+                renderStops(lastClosestIndex);
+            },
+            err => console.warn("Locatie niet beschikbaar:", err.message)
+        );
+    } else {
+        console.warn("Geolocatie niet ondersteund");
+    }
+}, 2000); // wachten
+
+// eerste aanroep + interval
+getLocationAndUpdate();
+setInterval(getLocationAndUpdate, 1500);
+</script>
+</body>
+</html>
